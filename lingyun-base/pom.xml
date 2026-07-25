@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.lingyun</groupId>
+        <artifactId>ling-yun</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>lingyun-base</artifactId>
+    <packaging>pom</packaging>
+
+    <name>LingYun Base</name>
+    <description>可复用的基础设施库——缓存、邮件、查询DSL、RSM响应标准化、验证框架</description>
+
+    <modules>
+        <module>lingyun-base-core</module>
+        <module>lingyun-base-rsm</module>
+        <module>lingyun-base-rsm-mvc</module>
+        <module>lingyun-base-rsm-mybatis</module>
+        <module>lingyun-base-rsm-jdbc</module>
+        <!-- 后续逐步添加：
+        <module>lingyun-base-cache</module>
+        <module>lingyun-base-mail</module>
+        <module>lingyun-base-query</module>
+        <module>lingyun-base-rsm</module>
+        <module>lingyun-base-mybatis</module>
+        <module>lingyun-base-validation</module>
+        -->
+    </modules>
+
+    <!--
+      properties、dependencyManagement、build 均由父 POM (ling-yun) 继承，
+      此处仅定义 lingyun-base 模块特有的配置
+    -->
+
+</project>

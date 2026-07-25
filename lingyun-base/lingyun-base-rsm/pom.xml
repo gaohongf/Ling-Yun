@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.lingyun</groupId>
+        <artifactId>lingyun-base</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>lingyun-base-rsm</artifactId>
+    <packaging>jar</packaging>
+
+    <name>LingYun Base RSM</name>
+    <description>
+        响应标准化机制（Response Standardization Mechanism）。
+        提供：ResponseBuilder 响应构造器抽象、数据库驱动的消息模板系统、
+        @ExecutionSuccess/@ExecutionFailed 注解驱动响应包装、Bean Validation 消息集成。
+        附带 Response 作为建议的默认响应结构。
+    </description>
+
+    <dependencies>
+        <!-- 核心接口 -->
+        <dependency>
+            <groupId>com.lingyun</groupId>
+            <artifactId>lingyun-base-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Spring Web（不含 MVC）：ServerHttpResponse, HttpMessageConverter 等 HTTP 抽象 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+
+        <!-- JSON (Jackson)：AbstractJackson2HttpMessageConverter 运行时依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-json</artifactId>
+        </dependency>
+
+        <!-- Spring AOP: @Aspect (UnifiedFailureResponse) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+
+        <!-- Hibernate Validator: 验证消息集成 -->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+
+        <!-- Hutool: StringUtils 等工具 -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.lingyun</groupId>
+        <artifactId>lingyun-base</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>lingyun-base-rsm-jdbc</artifactId>
+    <packaging>jar</packaging>
+
+    <name>LingYun Base RSM JDBC</name>
+    <description>
+        RSM 的 Spring Data JDBC 存储实现 —
+        提供 ResponseMessageService 的数据库实现，基于 Spring Data JDBC + CrudRepository。
+        引入此模块后，RsmLoader 自动同步消息、MessageResponseBuilder 从数据库解析消息模板、
+        Bean Validation 消息插值接入数据库。
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.lingyun</groupId>
+            <artifactId>lingyun-base-rsm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Spring Data JDBC：CrudRepository, @Table, @Id -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jdbc</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

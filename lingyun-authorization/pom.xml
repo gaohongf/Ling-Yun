@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.lingyun</groupId>
+        <artifactId>ling-yun</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>lingyun-authorization</artifactId>
+    <packaging>pom</packaging>
+
+    <name>LingYun Authorization</name>
+    <description>可复用的认证授权框架——core 定义契约（零框架依赖），upper 模块提供 Spring Security 集成</description>
+
+    <modules>
+        <module>lingyun-authorization-core</module>
+        <module>lingyun-authorization-security</module>
+    </modules>
+
+</project>

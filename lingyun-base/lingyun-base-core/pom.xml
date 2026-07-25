@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.lingyun</groupId>
+        <artifactId>lingyun-base</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>lingyun-base-core</artifactId>
+    <packaging>jar</packaging>
+
+    <name>LingYun Base Core</name>
+    <description>
+        
+    </description>
+
+    <!--
+      设计原则：
+      - 不依赖 Spring / Spring Boot / MyBatis / Jackson
+      - 只依赖 JDK 17 + Lombok（编译期，optional）
+      - 定义契约（接口），由上层模块（lingyun-base-rsm 等）提供 Spring 适配实现
+    -->
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
