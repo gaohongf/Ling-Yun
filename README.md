@@ -101,7 +101,7 @@ public class App {
 @RestController
 public class HelloController {
     
-    // {"code":200, "msg":"操作成功", "data": "hello world", "type":"SUCCESS"}
+    // {"code":200, "msg":"操作成功", "data": "hello world!!!", "type":"SUCCESS"}
     @GetMapping("/hello")
     @ExecutionSuccess(GenericRsm.EXECUTION_SUCCESS)
     @ExecutionFailed(GenericRsm.EXECUTION_FAILED)
@@ -165,7 +165,7 @@ public class HelloController {
 - 无状态 Token 认证（Bearer Token → `SessionManager`）
 - 过滤器链：`ResourceFilter`（+10）→ `TokenParseFilter`（+20）
 - 资源级权限鉴权（5 级优先级链）
-- Dev / Prod 双模式自动切换（`app.env`）
+- Dev / Prod 双模式自动切换
 - 自动资源权限映射（基于 `@RequestMapping` 扫描）
 
 ## 依赖关系图
@@ -199,7 +199,7 @@ lingyun-authorization-security ──→ lingyun-authorization-core ──→ li
 4. **组合优于继承** — `MybatisResponseMessageService` 组合 Mapper，避免泛型 diamond 问题
 5. **`messageKey` 为主键** — ORM 实体以 `messageKey`（天然主键）而非自增 `code` 作为 `@Id`
 6. **`Role` 与 Spring Security 解耦** — `getAuthorities()` 返回 `Collection<String>`，转换工作由 `CertifiedUser` 负责
-7. **Dev/Prod 双模式** — 通过 `app.env` 属性自动切换 Token 过滤器和鉴权管理器
+7. **Dev/Prod 双模式** — 通过 `lingyun.auth.filter.token-parse` 和 `lingyun.auth.custom.manager` 自动切换
 
 ## 配置参考
 
@@ -214,12 +214,12 @@ http:
         default-failed-message: "Generic_execution_failed"
 
 # 认证授权配置
-app:
-  env: prod              # dev | prod  （不设置默认 dev，生产务必显式设置！）
-
 lingyun:
-  security:
-    enable-auto-resource-info: true   # 自动扫描 @RequestMapping 构建权限映射
+  auth:
+    filter:
+      token-parse: prod     # prod | dev  —— Token 解析过滤器模式
+    custom:
+      manager: prod         # prod | dev  —— 鉴权管理器模式
 ```
 
 ## 建表 SQL（消息存储）
