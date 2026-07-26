@@ -11,9 +11,8 @@ import com.lingyun.base.rsm.ResponsePackagingActuatorManager;
 /**
  * RSM 的 Spring Web MVC 自动配置类。
  * <p>
- * 在引入 {@code lingyun-base-rsm-mvc} 模块后通过
- * {@link EnableRsm4Mvc @EnableRsm4Mvc} 间接激活，
- * 自动注册以下 MVC 层 Bean：
+ * 引入此模块后，通过 {@code AutoConfiguration.imports} 自动激活，
+ * 无需手动添加任何注解。自动注册以下 MVC 层 Bean：
  * <ul>
  *   <li>{@link JsonResponseBodyPackerMvcAdapter} — 将核心包装逻辑接入 ResponseBodyAdvice 链</li>
  *   <li>{@link UnifiedFailureResponse} — AOP 切面，统一捕获并转换未处理异常</li>

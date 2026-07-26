@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Import;
 import com.lingyun.base.rsm.annotation.EnableRsm;
 
 /**
- * 启用 RSM + Spring Web MVC 完整自动配置的开关注解。
+ * 启用 RSM + Spring Web MVC 完整自动配置（可选）。
  * <p>
- * 标注在 Spring Boot 启动类或任意 {@code @Configuration} 类上。与 {@link com.lingyun.base.rsm.annotation.EnableRsm}
- * 的区别在于额外导入了 {@link MvcRsmAutoConfiguration}，从而自动注册：
+ * 引入 {@code rsm-mvc-spring-boot-starter} 后，MVC 适配会自动生效，<b>无需标注此注解</b>。
+ * 仅在需要显式声明依赖或覆盖自动配置时使用。自动注册的组件：
  * <ul>
  *   <li>{@link JsonResponseBodyPackerMvcAdapter} — 接入 ResponseBodyAdvice 链</li>
  *   <li>{@link UnifiedFailureResponse} — 异常统一转换 AOP 切面</li>

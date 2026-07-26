@@ -19,6 +19,7 @@
         <module>lingyun-authorization</module>
         <module>rsm-mybatisplus-spring-boot-starter</module>
         <module>rsm-jdbc-spring-boot-starter</module>
+        <module>rsm-mvc-spring-boot-starter</module>
     </modules>
 
     <properties>
@@ -48,7 +49,7 @@
             </dependency>
             <dependency>
                 <groupId>com.lingyun</groupId>
-                <artifactId>lingyun-base-rsm-mvc</artifactId>
+                <artifactId>rsm-mvc-spring-boot-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

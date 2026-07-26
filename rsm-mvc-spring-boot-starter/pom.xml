@@ -6,14 +6,15 @@
 
     <parent>
         <groupId>com.lingyun</groupId>
-        <artifactId>lingyun-base</artifactId>
+        <artifactId>ling-yun</artifactId>
         <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lingyun-base-rsm-mvc</artifactId>
+    <artifactId>rsm-mvc-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
 
-    <name>LingYun Base RSM MVC</name>
+    <name>RSM MVC Spring Boot Starter</name>
     <description>
         RSM 的 Spring Web MVC 适配层 —
         提供 ResponseBodyAdvice 适配器（将 JsonResponseBodyPacker 接入 MVC 响应拦截链）
