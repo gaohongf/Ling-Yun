@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * @param <T> 属性值类型
  */
 public class AuthorizationRequestAttribute<T> extends CustomRequestAttributes<T>{
-
+    
     private static final String PREFIX = "auth_";
 
     /** 当前请求匹配到的 API 资源信息（由 ResourceFilter 设置） */

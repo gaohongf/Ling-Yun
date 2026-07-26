@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import com.lingyun.base.rsm.JsonResponseBodyPacker;
 import com.lingyun.base.rsm.ResponseBuilder;
 import com.lingyun.base.rsm.ResponsePackagingActuatorManager;
+import com.lingyun.base.rsm.annotation.EnableRsm;
 
 /**
  * RSM 的 Spring Web MVC 自动配置类。
@@ -20,6 +21,7 @@ import com.lingyun.base.rsm.ResponsePackagingActuatorManager;
  * </ul>
  */
 @AutoConfiguration
+@EnableRsm
 public class MvcRsmAutoConfiguration {
 
     /**
