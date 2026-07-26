@@ -2,6 +2,7 @@ package com.lingyun.base.rsm;
 
 import com.lingyun.base.rsm.annotation.RsmInfo;
 import com.lingyun.base.rsm.message.ResponseMessage;
+import com.lingyun.base.rsm.message.ResponseType;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -35,8 +36,24 @@ public interface RsmManager {
             }
             rm.setTemplate(info.template());
             rm.setResponseStatus(info.status().value());
+            rm.setType(parseType(info.status().value()).name());
             messages.add(rm);
         }
         return messages;
+    }
+    default ResponseType parseType(int status){
+        if (status >= 200 && status < 300) {
+            return ResponseType.SUCCESS;
+        }
+
+        if (status >= 300 && status < 400) {
+            return ResponseType.WARN;
+        }
+
+        if (status >= 400) {
+            return ResponseType.ERROR;
+        }
+
+        return ResponseType.INFO;
     }
 }

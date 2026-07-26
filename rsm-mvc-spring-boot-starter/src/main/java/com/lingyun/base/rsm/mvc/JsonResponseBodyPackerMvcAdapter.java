@@ -2,6 +2,7 @@ package com.lingyun.base.rsm.mvc;
 
 import com.lingyun.base.rsm.JsonResponseBodyPacker;
 import com.lingyun.base.rsm.ResponseBuilder;
+import com.lingyun.base.rsm.annotation.NotPack;
 import com.lingyun.base.rsm.exception.RequestException;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -88,6 +89,7 @@ public class JsonResponseBodyPackerMvcAdapter implements ResponseBodyAdvice<Obje
      */
     @ResponseBody
     @ExceptionHandler(RequestException.class)
+    @NotPack
     public Object handleApiException(RequestException e, HttpServletResponse response) {
         return responseBuilder.build(new ServletServerHttpResponse(response), e.getMsgId(), null, e.getVarargs());
     }

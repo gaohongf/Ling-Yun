@@ -63,7 +63,9 @@ public class MvcErrorPackagingActuator implements ErrorPackagingActuator {
         if (body instanceof Map<?, ?> map) {
             Object status = map.get("status");
             if (status != null) {
-                return responseBuilder.build(response, status.toString(), null, new Object[] { map.get("error") });
+                return responseBuilder.build(response, status.toString(), null, new Object[] { 
+                    map.get("error") 
+                });
             } else {
                 return body;
             }

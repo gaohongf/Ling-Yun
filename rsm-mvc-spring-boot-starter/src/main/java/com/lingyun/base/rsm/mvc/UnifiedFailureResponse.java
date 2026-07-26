@@ -43,16 +43,16 @@ public class UnifiedFailureResponse {
      * <p>
      * 处理逻辑：
      * <ul>
-     *   <li>{@link RequestException} — 直接重新抛出</li>
-     *   <li>{@link ConstraintViolationException} — 直接重新抛出（由验证层专门处理）</li>
-     *   <li>其他异常 — 记录错误日志后，通过 {@link ResponsePackagingActuatorManager} 查找
-     *       匹配的执行器并委托其创建 {@link RequestException} 抛出</li>
+     * <li>{@link RequestException} — 直接重新抛出</li>
+     * <li>{@link ConstraintViolationException} — 直接重新抛出（由验证层专门处理）</li>
+     * <li>其他异常 — 记录错误日志后，通过 {@link ResponsePackagingActuatorManager} 查找
+     * 匹配的执行器并委托其创建 {@link RequestException} 抛出</li>
      * </ul>
      *
      * @param point     切点信息，用于获取方法签名
      * @param throwable 被抛出的原始异常
      * @return 此方法永远不会正常返回（总是抛出异常）
-     * @throws RequestException            最终抛出的包装异常
+     * @throws RequestException             最终抛出的包装异常
      * @throws ConstraintViolationException 验证异常直接透传
      */
     @AfterThrowing(value = """
@@ -64,20 +64,20 @@ public class UnifiedFailureResponse {
             || @annotation(org.springframework.web.bind.annotation.RequestMapping)
             || @annotation(org.springframework.web.bind.annotation.PutMapping))
             """, throwing = "throwable")
-    public Object aroundRequestHandler(JoinPoint point, Throwable throwable) {
+    public void aroundRequestHandler(JoinPoint point, Throwable throwable) {
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
         if (throwable instanceof RequestException e) {
-            throw e;
+            log.error("req-ex: {}", e.getMessage());
         } else if (throwable instanceof ConstraintViolationException e) {
-            throw e;
+            log.error("vaild-ex: {}", e.getMessage());
         } else {
             log.error("type:{}, message:{}", throwable.getClass(), throwable.getMessage());
             Class<?> handlerClass = method.getDeclaringClass();
             RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
-            ServletRequestAttributes attributes  = ((ServletRequestAttributes) requestAttributes);
+            ServletRequestAttributes attributes = ((ServletRequestAttributes) requestAttributes);
             throw responsePackagingActuatorManager.findActuator(handlerClass, method).createRequestException(method,
-                    handlerClass, 
+                    handlerClass,
                     new ServletServerHttpRequest(attributes.getRequest()),
                     new ServletServerHttpResponse(attributes.getResponse()),
                     throwable, new Object[] { throwable.getMessage() });
