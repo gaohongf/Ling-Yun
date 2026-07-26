@@ -12,7 +12,7 @@
 <dependency>
     <groupId>com.lingyun</groupId>
     <artifactId>lingyun-authorization-core</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
