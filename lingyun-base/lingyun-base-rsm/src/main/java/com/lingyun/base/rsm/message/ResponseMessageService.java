@@ -1,5 +1,6 @@
 package com.lingyun.base.rsm.message;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ public interface ResponseMessageService {
      * @return 对应的 ResponseMessage，未找到时返回 null
      */
     ResponseMessage findByMessageKey(String key);
-
+    
     /**
      * 根据消息键查询消息实体，返回 Optional 包装。
      *
@@ -38,6 +39,7 @@ public interface ResponseMessageService {
 
     /**
      * 保存一条消息实体。
+     * key 重复则保存失败并且返回false
      *
      * @param message 待保存的消息实体
      * @return 保存成功返回 true，否则返回 false
@@ -51,4 +53,10 @@ public interface ResponseMessageService {
      * @return 更新成功返回 true，否则返回 false
      */
     boolean updateByKey(ResponseMessage message);
+    /**
+     * 批量地更新或保存
+     * 
+     * @param messages 待更新或保存的 ResponseMessage 实例集
+     */
+    void batchSaveOrUpdate(Collection<ResponseMessage> messages);
 }

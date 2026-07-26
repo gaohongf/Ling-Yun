@@ -6,14 +6,15 @@
 
     <parent>
         <groupId>com.lingyun</groupId>
-        <artifactId>lingyun-base</artifactId>
+        <artifactId>ling-yun</artifactId>
         <version>1.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lingyun-base-rsm-jdbc</artifactId>
+    <artifactId>lingyun-rsm-jdbc</artifactId>
     <packaging>jar</packaging>
 
-    <name>LingYun Base RSM JDBC</name>
+    <name>LingYun RSM JDBC</name>
     <description>
         RSM 的 Spring Data JDBC 存储实现 —
         提供 ResponseMessageService 的数据库实现，基于 Spring Data JDBC + CrudRepository。

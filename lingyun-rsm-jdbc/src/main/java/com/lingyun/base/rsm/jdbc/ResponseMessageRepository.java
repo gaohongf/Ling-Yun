@@ -3,6 +3,8 @@ package com.lingyun.base.rsm.jdbc;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import com.lingyun.base.rsm.message.ResponseMessage;
+
 /**
  * {@link JdbcResponseMessage} 的 Spring Data JDBC 仓库。
  * <p>
@@ -11,4 +13,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ResponseMessageRepository extends CrudRepository<JdbcResponseMessage, String> {
+    
 }

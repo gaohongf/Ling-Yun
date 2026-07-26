@@ -4,6 +4,7 @@ import com.lingyun.base.rsm.message.ResponseMessage;
 import com.lingyun.base.rsm.message.ResponseMessageService;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -75,5 +76,10 @@ public class MybatisResponseMessageService implements ResponseMessageService {
             return entity;
         }
         return new MpResponseMessage(message);
+    }
+
+    @Override
+    public void batchSaveOrUpdate(Collection<ResponseMessage> messages) {
+        mapper.insertOrUpdate(messages.stream().map(this::ensureEntity).toList());
     }
 }

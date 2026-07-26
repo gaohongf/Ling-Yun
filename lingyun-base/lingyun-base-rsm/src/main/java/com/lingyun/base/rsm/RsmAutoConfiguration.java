@@ -11,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lingyun.base.rsm.message.DefaultResponseMessageServiceImpl;
 import com.lingyun.base.rsm.message.Response;
 import com.lingyun.base.rsm.message.ResponseMessageService;
 
@@ -50,12 +51,26 @@ public class RsmAutoConfiguration {
     }
 
     /**
+     * 注册默认的基于内存的 {@link ResponseMessageService} 实现。
+     * <p>
+     * 仅在没有其他 {@link ResponseMessageService} bean（如 MyBatis-Plus 或 JDBC 实现）时生效。
+     * 这保证引入 rsm 包即可独立使用，无需配置数据库。
+     *
+     * @return DefaultResponseMessageServiceImpl 实例
+     */
+    @ConditionalOnMissingBean(ResponseMessageService.class)
+    @Bean
+    public ResponseMessageService defaultResponseMessageService() {
+        return new DefaultResponseMessageServiceImpl();
+    }
+
+    /**
      * 注册默认响应构建器（需存在 {@link ResponseMessageService}）。
      * <p>
      * 当消费项目未提供自定义 {@link ResponseBuilder} 时自动生效。
      *
-     * @param responseMessageService 消息存储服务，用于从数据库解析消息模板
-     * @return 基于数据库消息模板的 {@link MessageResponseBuilder}
+     * @param responseMessageService 消息存储服务，用于解析消息模板
+     * @return 基于消息模板的 {@link MessageResponseBuilder}
      */
     @ConditionalOnMissingBean(ResponseBuilder.class)
     @ConditionalOnBean(ResponseMessageService.class)

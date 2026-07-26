@@ -21,16 +21,6 @@
         <module>lingyun-base-core</module>
         <module>lingyun-base-rsm</module>
         <module>lingyun-base-rsm-mvc</module>
-        <module>lingyun-base-rsm-mybatis</module>
-        <module>lingyun-base-rsm-jdbc</module>
-        <!-- 后续逐步添加：
-        <module>lingyun-base-cache</module>
-        <module>lingyun-base-mail</module>
-        <module>lingyun-base-query</module>
-        <module>lingyun-base-rsm</module>
-        <module>lingyun-base-mybatis</module>
-        <module>lingyun-base-validation</module>
-        -->
     </modules>
 
     <!--

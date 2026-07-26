@@ -4,6 +4,7 @@ import com.lingyun.base.rsm.message.ResponseMessage;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.InsertOnlyProperty;
 import org.springframework.data.relational.core.mapping.Table;
 
 /**
@@ -17,7 +18,8 @@ import org.springframework.data.relational.core.mapping.Table;
  */
 @Table("response_message")
 public class JdbcResponseMessage extends ResponseMessage implements Persistable<String> {
-
+    @InsertOnlyProperty
+    private Integer code;
     /** 复写父类字段以添加 {@link Id}——messageKey 是天然主键 */
     @Id
     private String messageKey;
@@ -45,6 +47,15 @@ public class JdbcResponseMessage extends ResponseMessage implements Persistable<
         this.isNew = source.getMessageKey() == null;
     }
 
+    @Override
+    public Integer getCode() {
+        return code;
+    }
+
+    @Override
+    public void setCode(Integer code) {
+        this.code = code;
+    }
     // ---- 字段读写 ----
 
     /**
@@ -100,4 +111,5 @@ public class JdbcResponseMessage extends ResponseMessage implements Persistable<
     public void markNotNew() {
         this.isNew = false;
     }
+    
 }

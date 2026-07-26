@@ -5,6 +5,7 @@ import com.lingyun.base.rsm.message.ResponseMessageService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -15,10 +16,11 @@ import java.util.List;
  * <p>
  * 设计要点：
  * <ul>
- *   <li>使用 {@link JdbcResponseMessage} 作为内部实体，实现 {@code Persistable<String>} 以精确控制 INSERT/UPDATE</li>
- *   <li>{@code save()} → INSERT（强制）</li>
- *   <li>{@code updateByKey()} → UPDATE（强制，WHERE message_key = ?）</li>
- *   <li>返回值始终为 {@link ResponseMessage}，保持接口隔离</li>
+ * <li>使用 {@link JdbcResponseMessage} 作为内部实体，实现 {@code Persistable<String>}
+ * 以精确控制 INSERT/UPDATE</li>
+ * <li>{@code save()} → INSERT（强制）</li>
+ * <li>{@code updateByKey()} → UPDATE（强制，WHERE message_key = ?）</li>
+ * <li>返回值始终为 {@link ResponseMessage}，保持接口隔离</li>
  * </ul>
  */
 @Service
@@ -36,7 +38,8 @@ public class JdbcResponseMessageService implements ResponseMessageService {
     }
 
     /**
-     * 根据消息键查找消息——messageKey 是天然主键，使用 {@code findById(key)} 等价于 WHERE message_key = ?。
+     * 根据消息键查找消息——messageKey 是天然主键，使用 {@code findById(key)} 等价于 WHERE message_key =
+     * ?。
      *
      * @param key 消息键
      * @return 匹配的 ResponseMessage，不存在时返回 null
@@ -60,20 +63,25 @@ public class JdbcResponseMessageService implements ResponseMessageService {
 
     /**
      * 新增一条响应消息——通过 {@link JdbcResponseMessage#markNew()} 强制 INSERT。
-     *
+     * 
      * @param message 待保存的消息
      * @return true — 保存成功
      */
     @Override
     public boolean save(ResponseMessage message) {
+        if (repository.existsById(message.getMessageKey())) {
+            return false;
+        }
+
         JdbcResponseMessage entity = ensureEntity(message);
-        entity.markNew();          // 强制 INSERT
+        entity.markNew(); // 强制 INSERT
         repository.save(entity);
         return true;
     }
 
     /**
-     * 根据消息键更新一条响应消息——通过 {@link JdbcResponseMessage#markNotNew()} 强制 UPDATE（WHERE message_key = ?）。
+     * 根据消息键更新一条响应消息——通过 {@link JdbcResponseMessage#markNotNew()} 强制 UPDATE（WHERE
+     * message_key = ?）。
      *
      * @param message 待更新的消息
      * @return true — 更新成功
@@ -81,9 +89,23 @@ public class JdbcResponseMessageService implements ResponseMessageService {
     @Override
     public boolean updateByKey(ResponseMessage message) {
         JdbcResponseMessage entity = ensureEntity(message);
-        entity.markNotNew();       // 强制 UPDATE（WHERE message_key = ?）
+        entity.markNotNew(); // 强制 UPDATE（WHERE message_key = ?）
         repository.save(entity);
         return true;
+    }
+
+    @Override
+    public void batchSaveOrUpdate(Collection<ResponseMessage> messages) {
+        repository.saveAll(messages.stream()
+                .map(this::ensureEntity)
+                .peek(msg -> {
+                    if (!repository.existsById(msg.getMessageKey())) {
+                        msg.markNew();
+                    } else {
+                        msg.markNotNew();
+                    }
+                })
+                .toList());
     }
 
     /** 若传入的已是实体则直接使用，否则新建包装。 */

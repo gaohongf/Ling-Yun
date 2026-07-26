@@ -35,22 +35,23 @@ public class RsmLoader {
                 .flatMap(m -> m.getResponseMessages().stream())
                 .toList();
 
-        // 数据库中已有的消息
-        Map<String, ResponseMessage> existing = service.list().stream()
-                .collect(Collectors.toMap(ResponseMessage::getMessageKey, rm -> rm));
+        service.batchSaveOrUpdate(declared);
+        // // 数据库中已有的消息
+        // Map<String, ResponseMessage> existing = service.list().stream()
+        //         .collect(Collectors.toMap(ResponseMessage::getMessageKey, rm -> rm));
         
-        for (ResponseMessage rm : declared) {
-            ResponseMessage exist = existing.get(rm.getMessageKey());
-            if (exist != null) {
-                // 已存在：更新模板和状态码
-                exist.setTemplate(rm.getTemplate());
-                exist.setResponseStatus(rm.getResponseStatus());
-                service.updateByKey(exist);
-            } else {
-                // 新消息：分配 code 并插入
-                rm.setType(rm.getResponseStatus() < 400 ? "SUCCESS" : "ERROR");
-                service.save(rm);
-            }
-        }
+        // for (ResponseMessage rm : declared) {
+        //     ResponseMessage exist = existing.get(rm.getMessageKey());
+        //     if (exist != null) {
+        //         // 已存在：更新模板和状态码
+        //         exist.setTemplate(rm.getTemplate());
+        //         exist.setResponseStatus(rm.getResponseStatus());
+        //         service.updateByKey(exist);
+        //     } else {
+        //         // 新消息：分配 code 并插入
+        //         rm.setType(rm.getResponseStatus() < 400 ? "SUCCESS" : "ERROR");
+        //         service.save(rm);
+        //     }
+        // }
     }
 }

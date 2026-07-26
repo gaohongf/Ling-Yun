@@ -29,6 +29,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- JUnit 5: 纯单元测试，不依赖 Spring Test -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Spring Web（不含 MVC）：ServerHttpResponse, HttpMessageConverter 等 HTTP 抽象 -->
         <dependency>
             <groupId>org.springframework</groupId>
