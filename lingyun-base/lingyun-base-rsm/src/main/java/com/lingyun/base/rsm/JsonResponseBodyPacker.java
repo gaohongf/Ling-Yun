@@ -12,7 +12,6 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lingyun.base.rsm.annotation.NotPack;
 import com.lingyun.base.rsm.str.RString;
 
@@ -26,16 +25,14 @@ import com.lingyun.base.rsm.str.RString;
 public class JsonResponseBodyPacker {
 
     private final ResponsePackagingActuatorManager manager;
-    private final ObjectMapper objectMapper;
 
     /**
      * 构造响应体包装器，注入执行器链管理器。
      *
      * @param manager 响应包装执行器链管理器（Spring 自动注入）
      */
-    public JsonResponseBodyPacker(ResponsePackagingActuatorManager manager, ObjectMapper objectMapper) {
+    public JsonResponseBodyPacker(ResponsePackagingActuatorManager manager) {
         this.manager = manager;
-        this.objectMapper = objectMapper;
     }
 
     /**

@@ -145,9 +145,8 @@ public class RsmAutoConfiguration {
      */
     @Bean
     public JsonResponseBodyPacker jsonResponseBodyPacker(
-            ResponsePackagingActuatorManager responsePackagingActuatorManager,
-            ObjectMapper objectMapper) {
-        return new JsonResponseBodyPacker(responsePackagingActuatorManager, objectMapper);
+            ResponsePackagingActuatorManager responsePackagingActuatorManager) {
+        return new JsonResponseBodyPacker(responsePackagingActuatorManager);
     }
 
     /**
