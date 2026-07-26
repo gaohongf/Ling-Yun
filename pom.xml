@@ -71,7 +71,7 @@
             </dependency>
             <dependency>
                 <groupId>com.lingyun</groupId>
-                <artifactId>lingyun-authorization-security</artifactId>
+                <artifactId>lingyun-authorization-security-spring-boot-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

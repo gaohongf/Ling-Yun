@@ -11,9 +11,10 @@ import org.springframework.context.annotation.Import;
 import com.lingyun.base.rsm.annotation.EnableRsm;
 
 /**
- * 启用 LingYun Security 自动配置的注解。
+ * 启用 LingYun Security 自动配置（可选）。
  * <p>
- * 将此注解添加到任意 Spring 配置类（通常为启动类）上，即可一键导入：
+ * 引入此模块后，安全组件会通过 {@code AutoConfiguration.imports} 自动生效，
+ * <b>无需标注此注解</b>。仅在需要显式声明依赖时使用。导入的组件：
  * </p>
  * <ul>
  *   <li>{@link ServletMvcResourceAuthorityMappingManager} —— 基于 Servlet MVC 注解扫描的资源-权限映射管理器</li>

@@ -10,7 +10,7 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>lingyun-authorization-security</artifactId>
+    <artifactId>lingyun-authorization-security-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
 
     <name>LingYun Authorization Security</name>
