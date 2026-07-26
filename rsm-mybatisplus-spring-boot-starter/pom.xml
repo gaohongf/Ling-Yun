@@ -11,13 +11,12 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lingyun-rsm-jdbc</artifactId>
+    <artifactId>rsm-mybatisplus-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
 
-    <name>LingYun RSM JDBC</name>
+    <name>RSM MyBatis-Plus Spring Boot Starter</name>
     <description>
-        RSM 的 Spring Data JDBC 存储实现 —
-        提供 ResponseMessageService 的数据库实现，基于 Spring Data JDBC + CrudRepository。
+        RSM 的 MyBatis-Plus 存储实现 — 提供 ResponseMessageService 的数据库实现。
         引入此模块后，RsmLoader 自动同步消息、MessageResponseBuilder 从数据库解析消息模板、
         Bean Validation 消息插值接入数据库。
     </description>
@@ -28,11 +27,9 @@
             <artifactId>lingyun-base-rsm</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <!-- Spring Data JDBC：CrudRepository, @Table, @Id -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jdbc</artifactId>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>
     </dependencies>
 

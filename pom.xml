@@ -17,8 +17,8 @@
     <modules>
         <module>lingyun-base</module>
         <module>lingyun-authorization</module>
-        <module>lingyun-rsm-mybatis</module>
-        <module>lingyun-rsm-jdbc</module>
+        <module>rsm-mybatisplus-spring-boot-starter</module>
+        <module>rsm-jdbc-spring-boot-starter</module>
     </modules>
 
     <properties>
@@ -53,12 +53,12 @@
             </dependency>
             <dependency>
                 <groupId>com.lingyun</groupId>
-                <artifactId>lingyun-rsm-mybatis</artifactId>
+                <artifactId>rsm-mybatisplus-spring-boot-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.lingyun</groupId>
-                <artifactId>lingyun-rsm-jdbc</artifactId>
+                <artifactId>rsm-jdbc-spring-boot-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
