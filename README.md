@@ -94,6 +94,16 @@ public class HelloController {
     public User getUser() {
         return new User(1, "zhangsan");
     }
+    // String 需要使用 RString 包装否则无法生效
+    // GET /hello/str
+    // -> {"code":1002,"data":"Hello World!","msg":"查询成功","type":"SUCCESS"}
+    @ExecutionSuccess(GenericRsm.QUERY_SUCCESS)
+    @ExecutionFailed(GenericRsm.QUERY_FAILED)
+    @GetMapping("/hello/str")
+    public RString helloWorld() {
+        return RString.warp("Hello World!");
+    }
+
     // GET /hello/error
     // -> {"code":1003,"data":null,"msg":"查询失败","type":"ERROR"}
     @ExecutionSuccess(GenericRsm.QUERY_SUCCESS)

@@ -14,6 +14,7 @@ import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lingyun.base.rsm.annotation.NotPack;
+import com.lingyun.base.rsm.str.RString;
 
 /**
  * JSON 响应体统一包装 — 核心逻辑，不耦合 Spring Web MVC 的 {@code ResponseBodyAdvice}。
@@ -75,18 +76,12 @@ public class JsonResponseBodyPacker {
             @NonNull ServerHttpResponse response) {
         Method method = parameter.getMethod();
         Class<?> handlerClass = parameter.getContainingClass();
-        Object res = manager.findActuator(handlerClass, method).doSuccess(body, method, handlerClass, request, response);
-        if (method.getReturnType().equals(String.class)) {
-            return handleString(res);
+        if (method.getReturnType().equals(RString.class) && body instanceof RString rstr) {
+            body = rstr.str();
         }
-        return res;
-    }
+        Object res = manager.findActuator(handlerClass, method).doSuccess(body, method, handlerClass, request,
+                response);
 
-    public Object handleString(Object o) {
-        try {
-            return objectMapper.writeValueAsString(o);
-        } catch (Exception e) {
-            return o;
-        }
+        return res;
     }
 }

@@ -5,8 +5,6 @@ import com.lingyun.base.rsm.message.ResponseMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 启动时自动扫描所有 RsmManager 实现，将其 @RsmInfo 消息同步到存储层。
@@ -36,22 +34,5 @@ public class RsmLoader {
                 .toList();
 
         service.batchSaveOrUpdate(declared);
-        // // 数据库中已有的消息
-        // Map<String, ResponseMessage> existing = service.list().stream()
-        //         .collect(Collectors.toMap(ResponseMessage::getMessageKey, rm -> rm));
-        
-        // for (ResponseMessage rm : declared) {
-        //     ResponseMessage exist = existing.get(rm.getMessageKey());
-        //     if (exist != null) {
-        //         // 已存在：更新模板和状态码
-        //         exist.setTemplate(rm.getTemplate());
-        //         exist.setResponseStatus(rm.getResponseStatus());
-        //         service.updateByKey(exist);
-        //     } else {
-        //         // 新消息：分配 code 并插入
-        //         rm.setType(rm.getResponseStatus() < 400 ? "SUCCESS" : "ERROR");
-        //         service.save(rm);
-        //     }
-        // }
     }
 }
