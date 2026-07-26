@@ -11,8 +11,7 @@
 
     <name>Ling-Yun</name>
     <description>
-        Ling-Yun 项目聚合 —
-        从 YuNi 中剥离的可复用 Java 基础设施库，按需引入、零框架依赖核心。
+        Ling-Yun — 可独立复用的 Java 基础设施库，按需引入、零框架依赖核心。
     </description>
 
     <modules>
@@ -26,7 +25,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- 框架版本（与 YuNi 保持一致，方便过渡） -->
+        <!-- 框架版本 -->
         <spring-boot.version>3.4.5</spring-boot.version>
         <mybatis-plus.version>3.5.8</mybatis-plus.version>
         <hutool.version>5.8.35</hutool.version>

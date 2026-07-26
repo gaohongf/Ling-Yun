@@ -11,7 +11,6 @@ import com.lingyun.base.user.IdentifiedUser;
  *   <li>构建 {@link CertifiedUser}</li>
  * </ol>
  * <p>
- * 对应 YuNi 中的 {@code CertificationService.authorize(User)}。
  */
 public interface CertificationChecker<T extends IdentifiedUser> {
 

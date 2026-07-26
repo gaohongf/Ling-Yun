@@ -4,20 +4,30 @@ This file provides guidance to Claude Code when working in this repository.
 
 ## Project Overview
 
-**LingYun** — 一组可从 YuNi 项目中独立复用的 Java 基础设施库。设计原则：**core 定义契约（零框架依赖），上层模块提供框架适配实现**。
+**LingYun** — 可独立复用的 Java 基础设施库。设计原则：**core 定义契约（零框架依赖），上层模块提供框架适配实现**。
 
 - **语言**: Java 17
 - **构建**: Maven 多模块
-- **来源**: 从 YuNi（梓渝小站）Spring Boot 3.4.5 项目中剥离
+- **版本**: 1.0.0
 
 ## 顶层模块
 
 ```
 Ling-Yun/
 ├── pom.xml                            ← 所有模块的公共父 POM（版本管理）
-├── lingyun-base/                      ← 基础设施库（缓存、邮件、查询、RSM 等）
+├── lingyun-base/                      ← 基础设施库（RSM + cache/mail/query 规划中）
 └── lingyun-authorization/             ← 认证授权框架（core 契约 + Spring Security 集成）
 ```
+
+## 快捷注解
+
+| 注解 | 说明 | 适用场景 |
+|---|---|---|
+| `@EnableRsm` | 启用 RSM 核心自动配置 | 非 MVC 环境 |
+| `@EnableRsm4Mvc` | 启用 RSM + Spring MVC 全自动配置 | Spring Web MVC 项目 |
+| `@EnableLingYunSecurity` | 启用认证授权 + Spring Security 集成 | 需要认证授权的项目 |
+
+> classpath 包含对应模块时自动配置默认生效，使用注解可显式声明。
 
 ## lingyun-base Module Structure
 
@@ -36,67 +46,72 @@ lingyun-base/                        ← 聚合 POM (groupId=com.lingyun)
 
 ```
 com.lingyun.base/
-├── annotation/
-│   └── IsOpen.java                 @IsOpen — 标记 API 无需认证（已迁至 lingyun-authorization-core）
-└── user/
-    └── IdentifiedUser.java          Serializable getId() — 身份抽象接口
+├── user/
+│   └── IdentifiedUser.java          Serializable getId() — 身份抽象接口
+└── request/
+    └── CustomRequestAttributes<T>.java  泛型请求属性存储抽象基类
 ```
 
 ### lingyun-base-rsm
 
 **依赖**: `lingyun-base-core` + Spring Web（不含 Web MVC）+ Spring AOP + Hibernate Validator + Hutool + Jackson  
 **ORM 解耦**: RSM 不依赖任何 ORM；`ResponseMessage` 为纯 POJO，表映射由子模块（如 rsm-mybatis）负责  
-**Web MVC 解耦**: `JsonResponseBodyPacker` 不实现 `ResponseBodyAdvice`；`ErrorPackagingActuator` 已迁至 `lingyun-base-rsm-mvc`。引入 MVC 适配模块即可自动接入
+**Web MVC 解耦**: RSM 仅依赖 `spring-web`，`ResponseBodyAdvice` 适配在 `rsm-mvc` 模块
 
 ```
 com.lingyun.base.rsm/
-├── R.java                          error() + msg() + params() + h_msg() + h_params()
-├── ResponseBuilder<T>.java         响应构造器抽象 — 泛型 T 允许项目自定义响应结构
-├── RsmManager.java                 消息声明接口 — 子类用 @RsmInfo 注解声明消息
-├── RsmLoader.java                  启动时扫描 RsmManager 并同步消息到存储层（需要 ResponseMessageService bean）
-├── ResponsePackagingActuator.java  响应包装执行器接口
-├── ResponsePackagingActuatorManager.java  执行器链管理
-├── AnnotationPackagingActuator.java  注解驱动包装（识别 @ExecutionSuccess/Failed）
-├── DefaultResponsePackagingActuator.java  兜底执行器
-├── JsonResponseBodyPacker.java     @Component — 核心包装逻辑（MVC 适配器见 rsm-mvc 模块）
-├── UnifiedFailureResponse.java     @Aspect 捕获未处理异常 → RequestException
-├── MessageResponseBuilder.java     默认 ResponseBuilder<Response> 实现（需 ResponseMessageService bean, @ConditionalOnBean）
-├── RsmRequestAttribute.java        请求级属性存储（MESSAGE/HEADER_MESSAGE/CONFIRMED_RESPONSE_MESSAGE）
-├── AnnotationResponsePackConfiguration.java  配置属性（http.response.packer.annotation.*）
-├── GenericRsm.java                 通用 CRUD 消息定义（QUERY_SUCCESS, CREATE_SUCCESS 等）
-├── HttpStatusRsm.java              HTTP 状态码 → 中文消息映射
-├── exception/
-│   └── RequestException.java       业务请求异常 — msgId + varargs
+├── RsmAutoConfiguration.java        Spring Boot 自动配置入口
+├── R.java                           静态工具类：error() + msg() + params() + h_msg() + h_params()
+├── ResponseBuilder<T>.java          响应构造器抽象 — 泛型 T 允许项目自定义响应结构
+├── RsmManager.java                  消息声明基类 — 子类用 @RsmInfo 注解声明消息
+├── RsmLoader.java                   启动时扫描 RsmManager 并同步消息到数据库
+├── JsonResponseBodyPacker.java      核心 JSON 响应包装器
+├── MessageResponseBuilder.java      默认 ResponseBuilder<Response> 实现
 ├── annotation/
-│   ├── RsmInfo.java                @RsmInfo(template, status) — 声明消息
-│   ├── ExecutionSuccess.java       @ExecutionSuccess(value) — 成功时消息键
-│   ├── ExecutionFailed.java        @ExecutionFailed(value) — 失败时消息键
-│   ├── BodyPackSetting.java        @BodyPackSetting — 包装行为控制
-│   └── NotPack.java                @NotPack — 标记方法/类退出响应自动包装
+│   ├── EnableRsm.java               @EnableRsm — 显式启用 RSM 自动配置
+│   ├── RsmInfo.java                 @RsmInfo(template, status) — 声明消息
+│   ├── ExecutionSuccess.java        @ExecutionSuccess(value) — 成功时消息键
+│   ├── ExecutionFailed.java         @ExecutionFailed(value) — 失败时消息键
+│   ├── BodyPackSetting.java         @BodyPackSetting — 包装行为控制
+│   └── NotPack.java                 @NotPack — 标记方法/类退出响应自动包装
+├── ResponsePackagingActuator.java   响应包装执行器接口（责任链模式）
+├── ResponsePackagingActuatorManager.java  执行器链管理
+├── AnnotationPackagingActuator.java  注解驱动包装（@ExecutionSuccess/Failed）
+├── DefaultResponsePackagingActuator.java  兜底执行器
+├── ErrorPackagingActuator.java      错误包装执行器标记接口
+├── RsmRequestAttribute.java         请求级属性存储
+├── AnnotationResponsePackConfiguration.java  配置属性（http.response.packer.annotation.*）
+├── GenericRsm.java                  通用 CRUD 消息定义
+├── HttpStatusRsm.java               HTTP 状态码 → 中文消息映射
+├── exception/
+│   └── RequestException.java        业务请求异常 — msgId + varargs
 ├── message/
-│   ├── Response.java               默认响应体 { code, data, msg, type }
-│   ├── ResponseType.java           SUCCESS / WARN / INFO / ERROR
-│   ├── MessageWithParams.java      消息键 + 参数载体（R.msg() 使用）
-│   ├── ResponseMessage.java        响应消息实体（纯 POJO，无 ORM 耦合）
-│   └── ResponseMessageService.java 消息存储抽象接口（findByMessageKey / list / save / updateById）
+│   ├── Response.java                默认响应体 { code, data, msg, type }
+│   ├── ResponseType.java            SUCCESS / WARN / INFO / ERROR
+│   ├── MessageWithParams.java       消息键 + 参数载体
+│   ├── ResponseMessage.java         响应消息实体（纯 POJO，无 ORM 耦合）
+│   └── ResponseMessageService.java  消息存储抽象接口
 └── validation/
-    ├── BaseValidationRsm.java      Jakarta/Hibernate 标准约束的中文消息模板
+    ├── BaseValidationRsm.java       Jakarta/Hibernate 标准约束的中文消息模板
     ├── DatabaseMessageInterpolator.java  数据库驱动的验证消息插值器
     ├── SimpleMessageInterpolatorContext.java  验证上下文包装
     ├── FormValidationErrorMessages.java  表单验证错误集合
-    ├── Validation2UnifyMessageErrorAdapter.java  @RestControllerAdvice 统一处理 3 种验证异常
-    └── ValidationConfiguration.java  @ConditionalOnBean(ResponseMessageService) 注册验证插值器
+    ├── Validation2UnifyMessageErrorAdapter.java  统一处理 3 种验证异常
+    └── ValidationConfiguration.java  验证插值器条件装配
 ```
 
 ### lingyun-base-rsm-mvc
 
 **依赖**: `lingyun-base-rsm` + Spring Web MVC（spring-boot-starter-web）  
-**按需引入**: 仅当项目使用 Spring Web MVC 时才需引入——自动注册 `ResponseBodyAdvice` 适配器和 ErrorController 包装
+**按需引入**: 引入即自动注册 `ResponseBodyAdvice` 适配器和 ErrorController 包装
 
 ```
 com.lingyun.base.rsm.mvc/
-├── JsonResponseBodyPackerMvcAdapter.java  @ControllerAdvice + ResponseBodyAdvice — 委托给 JsonResponseBodyPacker
-└── ErrorPackagingActuator.java            ResponsePackagingActuator 实现 — 识别 ErrorController
+├── MvcRsmAutoConfiguration.java       Spring Boot MVC 适配自动配置
+├── EnableRsm4Mvc.java                 @EnableRsm4Mvc — 显式启用 MVC 全自动配置
+├── JsonResponseBodyPackerMvcAdapter.java  @ControllerAdvice + ResponseBodyAdvice
+├── MvcErrorPackagingActuator.java     ErrorController 识别执行器
+└── UnifiedFailureResponse.java        @Aspect 全局异常捕获 → RSM 错误响应
 ```
 
 ### lingyun-base-rsm-mybatis
@@ -105,20 +120,20 @@ com.lingyun.base.rsm.mvc/
 
 ```
 com.lingyun.base.rsm.mybatis/
-├── MpResponseMessage.java                    extends ResponseMessage + @TableName + @TableId（ORM 注解隔离）
+├── MpResponseMessage.java                    extends ResponseMessage + @TableName + @TableId
 ├── ResponseMessageMapper.java                MyBatis-Plus BaseMapper<MpResponseMessage>
 └── MybatisResponseMessageService.java        实现 ResponseMessageService（组合 Mapper）
 ```
 
 ### lingyun-base-rsm-jdbc
 
-**依赖**: `lingyun-base-rsm` + Spring Data JDBC（spring-boot-starter-data-jdbc）  
-**设计**: 与 MyBatis-Plus 实现平行的另一种存储方案，用于验证 `ResponseMessageService` 接口的 ORM 无关性
+**依赖**: `lingyun-base-rsm` + Spring Data JDBC  
+**设计**: 与 MyBatis-Plus 实现平行——验证 `ResponseMessageService` 接口的 ORM 无关性
 
 ```
 com.lingyun.base.rsm.jdbc/
-├── JdbcResponseMessage.java          extends ResponseMessage + @Table + @Id + Persistable（ORM 注解隔离）
-├── ResponseMessageRepository.java    CrudRepository<JdbcResponseMessage, Integer>
+├── JdbcResponseMessage.java          extends ResponseMessage + @Table + @Id + Persistable
+├── ResponseMessageRepository.java    CrudRepository<JdbcResponseMessage, String>
 └── JdbcResponseMessageService.java  实现 ResponseMessageService（组合 Repository）
 ```
 
@@ -126,65 +141,39 @@ com.lingyun.base.rsm.jdbc/
 
 ```
 lingyun-base-rsm-mybatis ──→ lingyun-base-rsm ──→ lingyun-base-core
- (MyBatis-Plus 存储实现)      (响应框架 + 接口)      (纯 JDK 核心)
+lingyun-base-rsm-jdbc    ──→ lingyun-base-rsm          (纯JDK)
+lingyun-base-rsm-mvc     ──→ lingyun-base-rsm
 
-lingyun-base-rsm-jdbc ──→ lingyun-base-rsm
- (Spring Data JDBC 存储)     (响应框架 + 接口)
-
-lingyun-base-rsm-mvc ──→ lingyun-base-rsm
- (MVC 适配层)               (响应框架 + 接口)
+lingyun-authorization-security ──→ lingyun-authorization-core ──→ lingyun-base-core
+                                    (零框架契约)
+lingyun-authorization-security ──→ lingyun-base-rsm
 ```
-
-**按需引入**：
-- 只要 RSM 框架：引入 `lingyun-base-rsm`（消息功能自动降级，响应体直通）
-- RSM + Spring Web MVC：额外引入 `lingyun-base-rsm-mvc`（自动注册 `ResponseBodyAdvice` 适配器）
-- RSM + MyBatis-Plus 消息存储：额外引入 `lingyun-base-rsm-mybatis`
-- RSM + Spring Data JDBC 消息存储：额外引入 `lingyun-base-rsm-jdbc`
-- 两种存储实现可互换——`RsmLoader` 只依赖 `ResponseMessageService` 接口，不关心实现
 
 ## Design Decisions
 
 1. **RSM 与 Web MVC 分层解耦**  
-   `lingyun-base-rsm` 仅依赖 `spring-web`（不含 `spring-webmvc`）。`JsonResponseBodyPacker` 退化为 `@Component` + 核心方法；`ErrorPackagingActuator` 迁至 `lingyun-base-rsm-mvc`。使用 MVC 的项目引入 `rsm-mvc` 模块即可自动对接 `ResponseBodyAdvice`。
+   `lingyun-base-rsm` 仅依赖 `spring-web`（不含 `spring-webmvc`）。MVC 适配在 `rsm-mvc` 模块，引入即可自动对接 `ResponseBodyAdvice`。
 
-2. **`@ExecutionSuccess` / `@ExecutionFailed` / `@BodyPackSetting` 不含 `@ResponseBody`**  
-   去掉 `@ResponseBody` 注解是为了减少对 Spring Web 的依赖——`@RestController` 已提供 `@ResponseBody` 语义，注解上再加是冗余的。
+2. **注解不含 `@ResponseBody`**  
+   `@ExecutionSuccess` / `@ExecutionFailed` / `@BodyPackSetting` 不含 `@ResponseBody`，`@RestController` 已提供该语义。
 
 3. **`ResponseBuilder<T>` 的泛型 `T` 是扩展点**  
-   不同项目可以传入自己的响应结构。`Response` 是 RSM 自带的"建议实现"而非强制约束。
+   不同项目可传入自己的响应结构。`Response` 是建议实现，非强制约束。
 
-4. **`ResponseMessage` 为纯 POJO，ORM 注解放在各模块的实体子类中**  
-   `MpResponseMessage`（MyBatis-Plus）和 `JdbcResponseMessage`（Spring Data JDBC）均 extends `ResponseMessage` 并添加各自 ORM 注解（`@TableName`/`@TableId` 或 `@Table`/`@Id`），**均在 messageKey（天然主键）而非 code（流水号）上加 @Id**。核心 POJO 与 ORM 完全解耦——这是验证扩展性的关键设计。
+4. **`ResponseMessage` 为纯 POJO，ORM 注解隔离在子类**  
+   `MpResponseMessage` 和 `JdbcResponseMessage` 均 extends `ResponseMessage`，各自添加 ORM 注解。**messageKey 为天然主键**（加 `@Id`），code 为流水号。
 
-5. **`ResponseMessageService` 是纯接口，不继承 MyBatis-Plus `IService`**  
-   RSM 不绑定任何 ORM。两个实现（`MybatisResponseMessageService`、`JdbcResponseMessageService`）均用**组合而非继承**——避免了泛型 diamond 继承问题。
+5. **`ResponseMessageService` 为纯接口**  
+   不继承任何 ORM 特定接口。实现类用**组合而非继承**。
 
-6. **`RsmLoader` / `MessageResponseBuilder` / `ValidationConfiguration` 使用 `@ConditionalOnBean` / `@Autowired(required = false)`**  
-   无 `ResponseMessageService` 实现时优雅降级，RSM 仍可启动但不提供消息模板解析。
+6. **条件装配保证优雅降级**  
+   `RsmLoader` / `MessageResponseBuilder` / `ValidationConfiguration` 使用 `@ConditionalOnBean`，无 `ResponseMessageService` 时 RSM 仍可用。
 
-7. **`R.java` 位于 rsm 模块**  
-   唯一的 `R` 类提供 `error()` + `msg()` / `params()` / `h_msg()` / `h_params()`，依赖 Spring RequestAttributes。
+7. **`Role` 与 Spring Security 解耦**  
+   `getAuthorities()` 返回 `Collection<String>`，转换工作交由 `CertifiedUser`。
 
-8. **不耦合 YuNi**  
-   `GenericRsm` 去掉了 `PAY_SUCCESS`/`PAY_FAILED` 等业务特定消息；`Gender` 枚举、`Api`/`ApiService` API 资源管理类均不纳入。
-
-## 与 YuNi 原文的对照
-
-| YuNi (com.daisy) | LingYun (com.lingyun) | 变化 |
-|---|---|---|
-| `yuni-base` | `lingyun-base-core` + `lingyun-base-rsm` + `lingyun-base-rsm-mvc` + `lingyun-base-rsm-mybatis` + `lingyun-base-rsm-jdbc` | 按职责拆成 5 个模块 |
-| `RespMsgService extends IService` | `ResponseMessageService` (纯接口) | 去 MyBatis-Plus 耦合 |
-| `RespMsgServiceImpl` | `MybatisResponseMessageService` + `JdbcResponseMessageService` | 两种 ORM 实现各一套，验证接口扩展性 |
-| `ResponseTypeEnum` | `ResponseType` | 去掉冗余 Enum 后缀 |
-| `@NotPack` 仅 METHOD | `@NotPack` 支持 TYPE + METHOD | 支持类级别退出包装 |
-| `@ExecutionSuccess` 含 `@ResponseBody` + `contentType` | 纯注解，只保留 `value()` | 减少 Spring Web 依赖 |
-| `GenericRsm` 含支付消息 | 移除 `PAY_SUCCESS`/`PAY_FAILED` | 去业务耦合 |
-| `ResponseMessage` 直接加 `@TableName` | 纯 POJO → `MpResponseMessage` / `JdbcResponseMessage` 子类各自添加 ORM 注解 | ORM 注解与核心 POJO 完全解耦 |
-| `JsonResponseBodyPacker` 直接实现 `ResponseBodyAdvice` | 拆为 `JsonResponseBodyPacker` (rsm) + `JsonResponseBodyPackerMvcAdapter` (rsm-mvc) | 去 spring-webmvc 依赖，MVC 适配层独立为可选模块 |
-| `ErrorPackagingActuator` 在 rsm 模块 | 迁至 `lingyun-base-rsm-mvc` | ErrorController 属 MVC 范畴，独立模块 |
-| `yuni-authorization` | `lingyun-authorization-core` + `lingyun-authorization-security` | 拆为契约层 + Spring Security 集成层；biz 层留在 YuNi |
-| `Role.getAuthorities()` → `GrantedAuthority` | → `Collection<String>` | 核心契约与 Spring Security 解耦 |
-| `@IsOpen` 在 `com.daisy.base` | 迁至 `lingyun-authorization-core.annotation` | 认证专用注解，不再放在通用 core 模块 |
+8. **Dev/Prod 双模式**  
+   通过 `lingyun.auth.filter.token-parse` 和 `lingyun.auth.custom.manager` 控制（值：`prod` / `dev`）。
 
 ## lingyun-authorization Module Structure
 
@@ -200,15 +189,20 @@ lingyun-authorization/                      ← 聚合 POM (groupId=com.lingyun)
 
 ```
 com.lingyun.authorization.core/
-├── annotation/
-│   └── IsOpen.java                 @IsOpen — 标记端点无需认证（从 lingyun-base-core 迁入）
+├── api/
+│   ├── ResourceInfo.java              API 资源信息接口 — id, isOpen, getName
+│   ├── ResourceInfoService<T>         路径→资源匹配服务 — matchPath, optMatchPath
+│   └── annotation/
+│       └── IsOpen.java                @IsOpen — 标记端点无需认证
 ├── entity/
-│   ├── User.java                   interface — getId, getEnable, getLocked
-│   ├── Role.java                   interface — getName, getAuthorities()→Collection<String>（与 Spring Security 解耦）
-│   └── Credential.java             interface — 凭证标记
+│   ├── User.java                      interface — getId, getEnable, getLocked
+│   ├── Role.java                      interface — getName, getAuthorities()→Collection<String>, getRouteIds()
+│   └── Credential.java                interface — 凭证标记
 └── session/
-    ├── SessionManager.java          interface — parse, issue, remove, logout
-    └── UserToken.java               record(id, serial)
+    ├── SessionManager.java             interface — parse, issue, remove, logout
+    ├── UserToken.java                  record(id, serial)
+    ├── CertificationChecker<T>         认证检查器接口
+    └── CertificationService.java       认证服务接口
 ```
 
 ### lingyun-authorization-security
@@ -217,58 +211,62 @@ com.lingyun.authorization.core/
 
 ```
 com.lingyun.authorization.security/
-├── CertifiedUser.java              Spring Security Authentication + IdentifiedUser 实现
-├── SecurityConfig.java             SecurityFilterChain 配置（无状态会话）
-├── CustomAuthorizationManager.java 鉴权管理器接口
-├── ProdAuthorizationManager.java   生产环境鉴权（@ConditionalOnProperty app.env=prod）
-├── DevAuthorizationManager.java    开发环境鉴权（始终放行）
-├── ResourceInfo.java               资源信息接口（替代 YuNi 的 Api）
-├── CustomAccessDeniedHandler.java  403 拒绝访问处理器
-├── AuthorizationRequestAttribute.java  请求属性存储（泛型）
-├── AuthenticationRsm.java          RsmManager — 认证相关消息键（17 个）
-├── CertificationChecker.java       认证检查器接口 — authorize(User)→CertifiedUser
-└── filter/
-    ├── TokenParseFilter.java       抽象 Token 解析过滤器
-    ├── ProdTokenParseFilter.java   生产环境 Token 解析
-    └── DevTokenParseFilter.java    开发环境 Token 解析（默认用户）
+├── SecurityAutoConfiguration.java        Spring Boot 安全自动配置入口
+├── SecurityFilterChainHelper.java        SecurityFilterChain 构建辅助器
+├── EnableLingYunSecurity.java            @EnableLingYunSecurity — 显式启用安全配置
+├── LingYunSecurityProperties.java        @ConfigurationProperties("lingyun.auth")
+├── CertifiedUser.java                    Spring Security Authentication + IdentifiedUser 实现
+├── CustomAuthorizationManager.java       鉴权管理器接口
+├── ProdAuthorizationManager.java         生产环境鉴权（5 级优先级链）
+├── DevAuthorizationManager.java          开发环境鉴权（始终放行）
+├── CustomAccessDeniedHandler.java        403 拒绝访问 → RSM 统一响应
+├── AuthorizationRequestAttribute<T>      请求属性存储（泛型）
+├── AuthenticationRsm.java                RsmManager — 认证消息键定义
+├── AnnotationResourceInfo.java           ResourceInfo POJO 实现
+├── ResourceAuthorityMappingManager<T>    权限映射管理器接口
+├── ServletMvcResourceAuthorityMappingManager  基于 RequestMappingHandlerMapping 的映射实现
+├── AutoResourceInfoServiceImpl.java      默认 ResourceInfoService（AntPathMatcher）
+├── ResourceInfoAutoConfiguration.java    资源信息自动配置
+├── filter/
+│   ├── TokenParseFilter.java             抽象 Token 解析过滤器（Ordered, +20）
+│   ├── ResourceFilter.java               资源信息解析过滤器（Ordered, +10）
+│   ├── ProdTokenParseFilter.java         生产环境 Token 解析（Bearer Token）
+│   └── DevTokenParseFilter.java          开发环境 Token 解析（默认用户 id=2）
 ```
 
-## lingyun-authorization Dependency Architecture
+## 鉴权优先级（ProdAuthorizationManager）
 
+1. errorPath 路径 → 放行
+2. 无 ResourceInfo（未配置资源映射）→ 已认证即放行
+3. ResourceInfo.isOpen() → 放行（`@IsOpen` 公开端点）
+4. CertifiedUser 拥有 resource.id() 对应权限 → 放行
+5. 否则 → 403 拒绝
+
+## 配置参考
+
+```yaml
+# RSM 配置
+http:
+  response:
+    packer:
+      annotation:
+        auto: true
+        default-success-message: "Generic_execution_success"
+        default-failed-message: "Generic_execution_failed"
+
+# 认证授权配置
+lingyun:
+  auth:
+    filter:
+      token-parse: prod    # prod | dev
+    custom:
+      manager: prod        # prod | dev
 ```
-lingyun-authorization-security ──→ lingyun-authorization-core ──→ lingyun-base-core
-  (Spring Security + Web)          (零框架契约)                   (IdentifiedUser)
 
-lingyun-authorization-security ──→ lingyun-base-rsm
-  (RSM: R.error, RsmManager)
-```
+## 后续规划
 
-**按需引入**：
-- 只要认证接口：引入 `lingyun-authorization-core`
-- 认证 + Spring Security 集成：额外引入 `lingyun-authorization-security`（自动配置 SecurityFilterChain、Token 过滤器等）
-
-## 设计决策：认证授权
-
-1. **`@IsOpen` 归属于 authorization 模块**  
-   从 `lingyun-base-core` 迁至 `lingyun-authorization-core`——它是认证授权领域的注解，不是通用基础设施。
-
-2. **`Role.getAuthorities()` 返回 `Collection<String>` 而非 `GrantedAuthority`**  
-   核心契约与 Spring Security 完全解耦。`CertifiedUser`（security 模块）负责将 plain string 转换为 `SimpleGrantedAuthority`。
-
-3. **`IdentifiedUser` 位于 `lingyun-base-core`**  
-   用户身份抽象（`Serializable getId()`）是通用概念，被 authorization 和其他模块共同使用。
-
-4. **Dev/Prod 环境通过 `app.env` 切换**  
-   `@ConditionalOnProperty(name = "app.env")` 自动激活对应的 Token 过滤器和鉴权管理器。
-
-5. **不纳入 biz 层**  
-   Controller、Service impl、MyBatis-Plus Entity、Email 认证器等业务相关代码留在 YuNi，仅提取框架层面的契约和 Spring Security 集成。
-
-## 后续规划（TODO）
-
-- [ ] `lingyun-base-cache` — EnhancedRedisCacheManager + TTL 语法糖（`#3600`）
-- [ ] `lingyun-base-mail` — EmailService 接口 + 实现（from 可配置，去品牌名硬编码）
+- [ ] `lingyun-base-cache` — EnhancedRedisCacheManager + TTL 语法糖
+- [ ] `lingyun-base-mail` — EmailService 接口 + 实现（from 可配置）
 - [ ] `lingyun-base-query` — AbstractQuery + Equals/Like/Range/Sort 查询 DSL
-- [ ] `lingyun-base-mybatis` — MetaObjectHandler 自动填充（去 YuNi 类名）
+- [ ] `lingyun-base-mybatis` — MetaObjectHandler 自动填充
 - [ ] `lingyun-base-validation` — 拆出独立的验证集成模块
-- [x] `lingyun-authorization` 剥离 — 从 yuni-authorization 中提取可复用认证框架 ✓
