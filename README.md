@@ -68,18 +68,42 @@ Ling-Yun (1.0.1)
 
 ### 30 秒体验
 
+引入 rsm-mvc模块
+```xml
+<dependency>
+    <groupId>com.lingyun</groupId>
+    <artifactId>rsm-mvc-spring-boot-starter</artifactId>
+    <version>1.0.1</version>
+</dependency>
+```
+创建测试 Controller
 ```java
 @RestController
 public class HelloController {
 
-    // → {"code":200, "msg":"操作成功", "data":"hello", "type":"SUCCESS"}
+    /**
+     * User
+     */
+    public record User(Integer id, String name) {
+    }
+    // GET /hello
+    // -> {"code":1002,"data":{"id":1,"name":"zhangsan"},"msg":"查询成功","type":"SUCCESS"}
+    @ExecutionSuccess(GenericRsm.QUERY_SUCCESS)
+    @ExecutionFailed(GenericRsm.QUERY_FAILED)
     @GetMapping("/hello")
-    @ExecutionSuccess(GenericRsm.EXECUTION_SUCCESS)
-    @ExecutionFailed(GenericRsm.EXECUTION_FAILED)
-    public String hello() {
-        return "hello";
+    public User getUser() {
+        return new User(1, "zhangsan");
+    }
+    // GET /hello/error
+    // -> {"code":1003,"data":null,"msg":"查询失败","type":"ERROR"}
+    @ExecutionSuccess(GenericRsm.QUERY_SUCCESS)
+    @ExecutionFailed(GenericRsm.QUERY_FAILED)
+    @GetMapping("/hello/error")
+    public void queryError() {
+        throw new RuntimeException();
     }
 }
+
 ```
 
 ## 按需引入
