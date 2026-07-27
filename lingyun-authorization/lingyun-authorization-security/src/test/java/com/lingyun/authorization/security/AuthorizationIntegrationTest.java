@@ -160,9 +160,6 @@ class AuthorizationIntegrationTest {
                 public void remove(User user) {
                 }
 
-                @Override
-                public void logout() {
-                }
             };
         }
     }
