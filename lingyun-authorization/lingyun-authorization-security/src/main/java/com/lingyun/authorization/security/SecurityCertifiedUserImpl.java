@@ -21,8 +21,6 @@ import java.util.stream.Collectors;
  */
 public class SecurityCertifiedUserImpl implements Authentication, CertifiedUser<Authentication> {
 
-    public static final GrantedAuthority ROOT_AUTHORITY = new SimpleGrantedAuthority("*:*");
-
     private final User user;
     private final Collection<Role> roles;
     private final Collection<GrantedAuthority> authorities;
@@ -107,7 +105,7 @@ public class SecurityCertifiedUserImpl implements Authentication, CertifiedUser<
     /**
      * 判断当前用户是否拥有指定权限。
      * <p>
-     * 若用户拥有 {@link #ROOT_AUTHORITY}（{@code *:*}），则视为拥有所有权限，直接返回 {@code true}。
+     * 若用户拥有超级角色权限（{@value Role#ALL_AUTHORITIES}），则视为拥有所有权限，直接返回 {@code true}。
      *
      * @param authority 待检查的权限
      * @return 是否拥有该权限

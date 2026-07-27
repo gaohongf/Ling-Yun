@@ -14,13 +14,13 @@ import java.util.Optional;
  */
 public interface CertifiedUser<T> extends IdentifiedUser {
 
-    public static final String ROOT_AUTHORITY = "*:*";
-    public static final String ROOT_ROUTE = "*";
-
     /** 返回当前用户拥有的角色集合 */
     Collection<Role> getRoles();
 
-    /** 从所有角色中汇总的前端路由 ID 集合。返回空集表示无权访问任何路由；包含 {@code "*"} 表示拥有全部路由。 */
+    /**
+     * 从所有角色汇总的前端路由 ID 集合。空集表示无权访问任何路由；
+     * 包含 {@link Role#ALL_ROUTE 超级角色路由}（{@value Role#ALL_ROUTE}）表示拥有全部路由。
+     */
     Collection<String> getRouteIds();
 
     /**
@@ -56,7 +56,7 @@ public interface CertifiedUser<T> extends IdentifiedUser {
     /** 判断当前用户是否拥有指定权限 */
     default boolean isAuthorized(String authority) {
         Collection<String> authorities = getPermissionIds();
-        if (authorities.contains(ROOT_AUTHORITY)) {
+        if (authorities.contains(Role.ALL_AUTHORITIES)) {
             return true;
         }
         return authorities.contains(authority);
