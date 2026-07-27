@@ -6,6 +6,19 @@ import com.lingyun.authorization.core.entity.User;
  * 会话管理抽象 — 定义 Token 的签发、解析、移除操作。
  * <p>
  * 具体项目提供实现（如 JWT + Redis、分布式 Session 等）。
+ *
+ * <h3>登出模板</h3>
+ * 登出由消费方在 Controller 中自行实现，从请求中提取 Token 后调用 {@link #remove(User)}：
+ * <pre>{@code
+ * @PostMapping("/logout")
+ * public void logout(HttpServletRequest request) {
+ *     String token = request.getHeader("Authorization").substring(7);
+ *     User user = sessionManager.parse(token);
+ *     if (user != null) {
+ *         sessionManager.remove(user);
+ *     }
+ * }
+ * }</pre>
  */
 public interface SessionManager {
 
@@ -32,10 +45,4 @@ public interface SessionManager {
      */
     void remove(User user);
 
-    /**
-     * 登出当前会话（移除当前请求上下文关联的 Token）。
-     * <p>
-     * 实现类通常从当前请求中获取 Token 进行注销，适用于"退出登录"场景。
-     */
-    void logout();
 }

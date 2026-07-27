@@ -10,6 +10,8 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import com.lingyun.authorization.core.api.ResourceInfoService;
 import com.lingyun.authorization.core.session.CertificationChecker;
+import com.lingyun.authorization.core.session.InMemorySessionManager;
+import com.lingyun.authorization.core.session.SessionManager;
 import com.lingyun.authorization.core.spi.RoleProvider;
 import com.lingyun.authorization.security.filter.ResourceFilter;
 import com.lingyun.authorization.security.filter.TokenParseFilter;
@@ -46,6 +48,20 @@ public class SecurityAutoConfiguration {
     @Bean
     public SecurityCertificationChecker certificationChecker(RoleProvider provider) {
         return new SecurityCertificationChecker(provider);
+    }
+
+    /**
+     * 注册默认的内存会话管理器。
+     * <p>
+     * 仅当未提供自定义 {@link SessionManager} 时生效。Token 为随机 UUID，
+     * 映射存储在内存中，适合开发调试或无分布式需求的场景。
+     *
+     * @return 内存会话管理器实例
+     */
+    @ConditionalOnMissingBean(SessionManager.class)
+    @Bean
+    public SessionManager inMemorySessionManager() {
+        return new InMemorySessionManager();
     }
 
     /**
