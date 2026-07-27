@@ -1,6 +1,10 @@
-# RSM MVC Spring Boot Starter
+# rsm-mvc-spring-boot-starter
 
-> Spring Boot Starter — 引入即自动启用 RSM + Spring Web MVC 适配
+将 RSM 接入 Spring Web MVC，引入即自动包装 Controller 返回值。
+
+## 解决了什么问题
+
+引入 `lingyun-base-rsm` 后 Controller 返回值不会被自动包装——因为核心包不依赖 MVC。加上这个 Starter，所有 `@RestController` 的返回值自动走 RSM 包装链路。
 
 ## 依赖
 
@@ -12,32 +16,12 @@
 </dependency>
 ```
 
-## 自动配置
-
-引入后通过 `AutoConfiguration.imports` 自动加载 `MvcRsmAutoConfiguration`，无需添加任何注解。自动注册：
-
-- `JsonResponseBodyPackerMvcAdapter` — `@ControllerAdvice` + `ResponseBodyAdvice` 自动包装
-- `UnifiedFailureResponse` — `@Aspect` 全局异常捕获 → RSM 错误响应
-- `MvcErrorPackagingActuator` — ErrorController 错误路径识别
+依赖：`lingyun-base-rsm` + `spring-boot-starter-web`，自动引入无需额外配置。
 
 ## 内容
 
-| 类 | 说明 |
+| 组件 | 说明 |
 |---|---|
-| `MvcRsmAutoConfiguration` | 自动配置入口（含 `@EnableRsm`） |
-| `JsonResponseBodyPackerMvcAdapter` | `ResponseBodyAdvice` 适配器 |
-| `UnifiedFailureResponse` | `@Aspect` 异常捕获切面 |
-| `MvcErrorPackagingActuator` | ErrorController 包装执行器 |
-| `@EnableRsm4Mvc` | 可选显式声明注解 |
-
-## 响应包装链路
-
-```
-Controller 方法返回
-    → UnifiedFailureResponse (@Around 切面)
-    → JsonResponseBodyPackerMvcAdapter (ResponseBodyAdvice)
-        → JsonResponseBodyPacker.pack()
-            → ResponsePackagingActuatorManager
-                → AnnotationPackagingActuator
-                → DefaultResponsePackagingActuator
-```
+| `JsonResponseBodyPackerMvcAdapter` | `ResponseBodyAdvice` 适配器，自动拦截返回值 |
+| `UnifiedFailureResponse` | `@Aspect` 切面，未处理异常自动转换为 RSM 错误响应 |
+| `MvcErrorPackagingActuator` | Spring Boot ErrorController 错误页识别 |

@@ -1,10 +1,10 @@
-# LingYun Base RSM
+# lingyun-base-rsm
 
-> 响应标准化框架（Response Standardization Middleware）
+响应标准化核心——提供统一响应体、消息管理、注解驱动包装。
 
-## 定位
+## 解决了什么问题
 
-提供统一的 API 响应格式、声明式消息管理、注解驱动包装控制。与 ORM 解耦、与 MVC 解耦——消息存储由 Starter 模块实现，MVC 适配由 `rsm-mvc-spring-boot-starter` 可选引入。
+不用在每个 Controller 方法里手动构建 `{ code, data, msg }` 响应体。声明注解 + 配置消息模板，框架自动完成包装。
 
 ## 依赖
 
@@ -16,62 +16,68 @@
 </dependency>
 ```
 
-## 核心组件
+依赖：`lingyun-base-core` + `spring-web` + `Jackson` + `Hibernate Validator`
 
-| 类 | 说明 |
-|---|---|
-| `R` | 静态工具类：`error()` / `msg()` / `params()` |
-| `ResponseBuilder<T>` | 响应构造器抽象——泛型 T 可扩展 |
-| `RsmManager` | 消息声明基类，`@RsmInfo` 注解字段声明消息 |
-| `RsmLoader` | 启动时扫描并同步消息到存储 |
-| `DefaultResponseMessageServiceImpl` | 默认内存实现，无数据库时自动启用 |
-| `JsonResponseBodyPacker` | 核心 JSON 响应包装逻辑 |
-| `ResponsePackagingActuatorManager` | 执行器链管理器 |
-| `AnnotationPackagingActuator` | `@ExecutionSuccess`/`@ExecutionFailed` 驱动 |
-| `DefaultResponsePackagingActuator` | 兜底执行器 |
+## 反例——我们不希望你这样写
 
-## 注解
+```java
+// 每个方法手动 new HashMap，塞 code、msg、data
+@GetMapping("/user")
+public Map<String, Object> getUser() {
+    Map<String, Object> result = new HashMap<>();
+    result.put("code", 200);
+    result.put("msg", "查询成功");
+    result.put("data", userService.findById(1));
+    return result;
+}
 
-| 注解 | 说明 |
-|---|---|
-| `@EnableRsm` | 显式启用 RSM 自动配置 |
-| `@RsmInfo` | 声明消息键的模板和 HTTP 状态码 |
-| `@ExecutionSuccess` | 方法成功时的消息键 |
-| `@ExecutionFailed` | 方法失败时的消息键 |
-| `@BodyPackSetting` | 包装行为控制 |
-| `@NotPack` | 退出自动包装 |
-
-## 验证集成
-
-`DatabaseMessageInterpolator` — 数据库驱动的验证消息插值器；`Validation2UnifyMessageErrorAdapter` — 统一处理 3 种验证异常。
-
-## 消息存储扩展
-
-RSM 无数据库时自动启用内存存储。引入 Starter 切换为 DB 实现：
-
-- **MyBatis-Plus** → `rsm-mybatisplus-spring-boot-starter`
-- **Spring Data JDBC** → `rsm-jdbc-spring-boot-starter`
-
-## MVC 适配
-
-```xml
-<dependency>
-    <groupId>com.lingyun</groupId>
-    <artifactId>rsm-mvc-spring-boot-starter</artifactId>
-    <version>1.0.1</version>
-</dependency>
+// 失败时又要重复一遍，code 和 msg 散落一地
+@GetMapping("/order")
+public Map<String, Object> getOrder() {
+    Map<String, Object> result = new HashMap<>();
+    try {
+        result.put("code", 200);
+        result.put("msg", "查询成功");
+        result.put("data", orderService.findById(1));
+    } catch (Exception e) {
+        result.put("code", 500);
+        result.put("msg", "查询失败");
+        result.put("data", null);
+    }
+    return result;
+}
 ```
 
-引入即自动注册 `ResponseBodyAdvice` + 全局异常包装。
+这样写的问题：响应结构不统一、code/msg 散落各处、没有类型约束、消息文本硬编码无法复用。
 
-## 配置
+## 正确用法——交给框架
 
-```yaml
-http:
-  response:
-    packer:
-      annotation:
-        auto: true
-        default-success-message: "Generic_execution_success"
-        default-failed-message: "Generic_execution_failed"
+```java
+// 返回业务对象即可，框架自动包装
+@ExecutionSuccess(GenericRsm.QUERY_SUCCESS)
+@ExecutionFailed(GenericRsm.QUERY_FAILED)
+@GetMapping("/user")
+public User getUser() {
+    return userService.findById(1);
+}
+// -> {"code":1002,"data":{"id":1,"name":"zhangsan"},"msg":"查询成功","type":"SUCCESS"}
+
+// 失败自动走 @ExecutionFailed 声明
+@ExecutionSuccess(GenericRsm.QUERY_SUCCESS)
+@ExecutionFailed(GenericRsm.QUERY_FAILED)
+@GetMapping("/order")
+public Order getOrder() {
+    return orderService.findById(1);
+}
+// 抛出异常时 -> {"code":1003,"data":null,"msg":"查询失败","type":"ERROR"}
 ```
+
+## 内容
+
+| 特性 | 说明 |
+|---|---|
+| 统一响应体 | `Response { code, data, msg, type }` |
+| 静态工具类 | `R.msg()` / `R.error()` 快捷构建 |
+| 注解声明 | `@RsmInfo` 声明消息模板，启动时自动同步 |
+| 包装控制 | `@ExecutionSuccess` / `@ExecutionFailed` / `@NotPack` |
+| 内存存储 | `DefaultResponseMessageServiceImpl` 无数据库时兜底 |

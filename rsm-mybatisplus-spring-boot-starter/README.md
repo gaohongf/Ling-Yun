@@ -1,6 +1,10 @@
-# RSM MyBatis-Plus Spring Boot Starter
+# rsm-mybatisplus-spring-boot-starter
 
-> Spring Boot Starter — RSM 的 MyBatis-Plus 消息存储，引入即自动配置
+RSM 的 MyBatis-Plus 消息存储实现——将消息模板持久化到数据库。
+
+## 解决了什么问题
+
+默认内存存储的消息在应用重启后会丢失。引入此模块后，消息模板写入数据库，应用重启后依然可用。
 
 ## 依赖
 
@@ -12,26 +16,17 @@
 </dependency>
 ```
 
-## 自动配置
-
-引入后通过 `AutoConfiguration.imports` 自动加载 `RsmMybatisPlusPluginAutoConfiguration`，注册 `MybatisResponseMessageService` 替代默认内存实现。
+依赖：`lingyun-base-rsm` + `mybatis-plus-spring-boot3-starter`
 
 ## 内容
 
-| 类 | 说明 |
+| 组件 | 说明 |
 |---|---|
-| `RsmMybatisPlusPluginAutoConfiguration` | 自动配置入口（含 `@EnableRsm`） |
-| `MpResponseMessage` | extends `ResponseMessage` + `@TableName` / `@TableId` |
-| `ResponseMessageMapper` | MyBatis-Plus `BaseMapper<MpResponseMessage>` |
-| `MybatisResponseMessageService` | 实现 `ResponseMessageService`，组合 Mapper |
+| `MybatisResponseMessageService` | `ResponseMessageService` 的 MyBatis-Plus 实现 |
+| `MpResponseMessage` | 带 `@TableName` / `@TableId` 的消息实体 |
+| `RsmMybatisPlusPluginAutoConfiguration` | 自动配置，引入即替换内存存储 |
 
-## 设计要点
-
-- **ORM 注解隔离**：`MpResponseMessage`  extends `ResponseMessage`（纯 POJO）
-- **组合优于继承**：不继承 `ServiceImpl`，避免泛型 diamond 问题
-- **`messageKey` 为主键**：`@TableId` 标注在 `messageKey`（天然主键）
-
-## 表结构
+### 建表 SQL
 
 ```sql
 CREATE TABLE response_message (

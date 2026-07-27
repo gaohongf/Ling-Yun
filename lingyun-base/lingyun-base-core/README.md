@@ -1,10 +1,10 @@
-# LingYun Base Core
+# lingyun-base-core
 
-> 纯 JDK 基础设施核心 —— 零框架依赖
+最底层的抽象接口，被所有其他模块依赖。
 
-## 定位
+## 解决了什么问题
 
-`lingyun-base-core` 是整个 Ling-Yun 生态的**最底层模块**，仅依赖 JDK 17 + Lombok（compile-time），不引入任何框架依赖。它提供整个项目共用的基础抽象接口。
+在整个项目中统一 `用户身份标识` 和 `请求属性存储` 的概念，让不同模块能基于同一套接口协作而不互相耦合。
 
 ## 依赖
 
@@ -16,17 +16,14 @@
 </dependency>
 ```
 
-传递依赖：**无**（仅 Lombok `optional`）
-
 ## 内容
 
-| 包 | 类 | 说明 |
-|---|---|---|
-| `com.lingyun.base.user` | `IdentifiedUser` | 已认证用户的身份标记接口，返回 `Serializable getId()` |
-| `com.lingyun.base.request` | `CustomRequestAttributes<T>` | 基于 `HttpServletRequest.setAttribute` 的请求级属性存储抽象基类 |
+| 类 | 说明 |
+|---|---|
+| `IdentifiedUser` | 用户身份标记接口，返回唯一标识 |
+| `CustomRequestAttributes<T>` | 基于 `HttpServletRequest` 的请求属性存储抽象 |
 
-## 设计原则
+## 被谁依赖
 
-- 不依赖 Spring、不依赖任何框架
-- 只定义契约（接口/抽象类），具体实现由上层模块提供
-- 被所有其他 LingYun 模块共同依赖
+- `lingyun-base-rsm`
+- `lingyun-authorization-core`

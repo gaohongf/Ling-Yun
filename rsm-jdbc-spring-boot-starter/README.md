@@ -1,6 +1,10 @@
-# RSM JDBC Spring Boot Starter
+# rsm-jdbc-spring-boot-starter
 
-> Spring Boot Starter — RSM 的 Spring Data JDBC 消息存储，引入即自动配置
+RSM 的 Spring Data JDBC 消息存储实现——与 MyBatis-Plus 版功能等价，适用于使用 Spring Data JDBC 的项目。
+
+## 解决了什么问题
+
+与 `rsm-mybatisplus-spring-boot-starter` 解决的问题相同：将消息模板持久化。选择这个版本而非 MyBatis-Plus 版的唯一原因就是你的项目用的是 Spring Data JDBC。
 
 ## 依赖
 
@@ -12,21 +16,12 @@
 </dependency>
 ```
 
-## 自动配置
-
-引入后通过 `AutoConfiguration.imports` 自动加载 `RsmJdbcPluginAutoConfiguration`，注册 `JdbcResponseMessageService` 替代默认内存实现。
+依赖：`lingyun-base-rsm` + `spring-boot-starter-data-jdbc`
 
 ## 内容
 
-| 类 | 说明 |
+| 组件 | 说明 |
 |---|---|
-| `RsmJdbcPluginAutoConfiguration` | 自动配置入口（含 `@EnableRsm`） |
-| `JdbcResponseMessage` | extends `ResponseMessage` + `@Table` / `@Id` + `Persistable` |
-| `ResponseMessageRepository` | `CrudRepository<JdbcResponseMessage, String>` |
-| `JdbcResponseMessageService` | 实现 `ResponseMessageService`，组合 Repository |
-
-## 设计要点
-
-- 与 MyBatis-Plus 实现可互换，均实现 `ResponseMessageService` 接口
-- `Persistable<String>` 控制 INSERT vs UPDATE
-- **`messageKey` 为主键**：`@Id` 标注在 `messageKey`（天然主键）
+| `JdbcResponseMessageService` | `ResponseMessageService` 的 JDBC 实现 |
+| `JdbcResponseMessage` | 带 `@Table` / `@Id` 的消息实体 |
+| `RsmJdbcPluginAutoConfiguration` | 自动配置，引入即替换内存存储 |
