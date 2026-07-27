@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
 import com.lingyun.authorization.core.api.ResourceInfo;
+import com.lingyun.authorization.core.entity.CertifiedUser;
 
 import java.util.Objects;
 import java.util.function.Supplier;

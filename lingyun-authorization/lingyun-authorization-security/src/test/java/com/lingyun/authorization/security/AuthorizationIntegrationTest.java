@@ -2,6 +2,7 @@ package com.lingyun.authorization.security;
 
 import com.lingyun.authorization.core.api.ResourceInfoService;
 import com.lingyun.authorization.core.api.annotation.IsOpen;
+import com.lingyun.authorization.core.entity.CertifiedUser;
 import com.lingyun.authorization.core.entity.Role;
 import com.lingyun.authorization.core.entity.User;
 import com.lingyun.authorization.core.session.CertificationChecker;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -103,7 +105,7 @@ class AuthorizationIntegrationTest {
 
         @Bean
         @Primary
-        public CertificationChecker<CertifiedUser> mockCertificationChecker() {
+        public CertificationChecker<CertifiedUser<Authentication>> mockCertificationChecker() {
             return user -> {
                 Role rootRole = new Role() {
                     @Override
@@ -121,7 +123,7 @@ class AuthorizationIntegrationTest {
                         return List.of("*");
                     }
                 };
-                return new CertifiedUser(user, List.of(rootRole));
+                return new SecurityCertifiedUserImpl(user, List.of(rootRole));
             };
         }
 

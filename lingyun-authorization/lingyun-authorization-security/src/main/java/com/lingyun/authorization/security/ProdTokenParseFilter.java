@@ -1,5 +1,6 @@
 package com.lingyun.authorization.security;
 
+import com.lingyun.authorization.core.entity.CertifiedUser;
 import com.lingyun.authorization.core.session.CertificationChecker;
 import com.lingyun.authorization.security.filter.TokenParseFilter;
 import jakarta.annotation.Resource;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -33,7 +35,7 @@ public class ProdTokenParseFilter extends TokenParseFilter {
     @Resource
     private com.lingyun.authorization.core.session.SessionManager sessionManager;
     @Resource
-    private CertificationChecker<CertifiedUser> certificationChecker;
+    private CertificationChecker<CertifiedUser<Authentication>> certificationChecker;
     @Resource
     private HandlerExceptionResolver handlerExceptionResolver;
 
@@ -73,9 +75,9 @@ public class ProdTokenParseFilter extends TokenParseFilter {
 
         try {
             var user = sessionManager.parse(authorization);
-            CertifiedUser authorized = certificationChecker.authorize(user);
+            CertifiedUser<Authentication> authorized = certificationChecker.authorize(user);
             AuthorizationRequestAttribute.AUTHORIZATION_CERTIFIED_USER.set(request, authorized);
-            SecurityContextHolder.getContext().setAuthentication(authorized);
+            SecurityContextHolder.getContext().setAuthentication(authorized.adapt());
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             // 若无法识别 token 且端点非公开，则转发到 error 页面

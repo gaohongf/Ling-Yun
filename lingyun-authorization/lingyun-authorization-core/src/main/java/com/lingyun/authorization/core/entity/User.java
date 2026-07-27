@@ -2,6 +2,7 @@ package com.lingyun.authorization.core.entity;
 
 import java.io.Serializable;
 
+
 /**
  * 用户抽象接口 — 认证模块通过此接口获取用户信息，不依赖具体的 User 实体类。
  * <p>

@@ -1,5 +1,6 @@
 package com.lingyun.authorization.security;
 
+import com.lingyun.authorization.core.entity.CertifiedUser;
 import com.lingyun.authorization.core.entity.User;
 import com.lingyun.authorization.core.session.CertificationChecker;
 import com.lingyun.authorization.security.filter.TokenParseFilter;
@@ -8,6 +9,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -25,7 +28,7 @@ public class DevTokenParseFilter extends TokenParseFilter {
     };
 
     @Resource
-    private CertificationChecker<CertifiedUser> certificationChecker;
+    private CertificationChecker<CertifiedUser<Authentication>> certificationChecker;
     @Resource
     private HandlerExceptionResolver handlerExceptionResolver;
 
@@ -38,9 +41,9 @@ public class DevTokenParseFilter extends TokenParseFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
-            CertifiedUser authorized = certificationChecker.authorize(DEV_USER);
+            CertifiedUser<Authentication> authorized = certificationChecker.authorize(DEV_USER);
             AuthorizationRequestAttribute.AUTHORIZATION_CERTIFIED_USER.set(request, authorized);
-            SecurityContextHolder.getContext().setAuthentication(authorized);
+            SecurityContextHolder.getContext().setAuthentication(authorized.adapt());
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             request.setAttribute("jakarta.servlet.error.status_code", 401);

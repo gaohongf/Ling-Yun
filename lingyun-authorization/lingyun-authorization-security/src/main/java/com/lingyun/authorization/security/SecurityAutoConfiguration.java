@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
 import com.lingyun.authorization.core.api.ResourceInfoService;
+import com.lingyun.authorization.core.session.CertificationChecker;
+import com.lingyun.authorization.core.spi.RoleProvider;
 import com.lingyun.authorization.security.filter.ResourceFilter;
 import com.lingyun.authorization.security.filter.TokenParseFilter;
 
@@ -25,13 +27,32 @@ import com.lingyun.authorization.security.filter.TokenParseFilter;
  */
 @AutoConfiguration
 @Import({
-    AuthenticationRsm.class
+        AuthenticationRsm.class
 })
 public class SecurityAutoConfiguration {
 
+
+    /**
+     * 注册 Spring Security 默认的认证检查器。
+     * <p>
+     * 仅当未提供自定义 {@link CertificationChecker} 且存在 {@link RoleProvider} 时生效。
+     * 自动装配角色数据提供方，通过 {@link RoleProvider#getUserRoles} 加载用户权限。
+     *
+     * @param provider 角色数据提供方
+     * @return Spring Security 认证检查器
+     */
+    @ConditionalOnMissingBean(CertificationChecker.class)
+    @ConditionalOnBean(RoleProvider.class)
+    @Bean
+    public SecurityCertificationChecker certificationChecker(RoleProvider provider) {
+        return new SecurityCertificationChecker(provider);
+    }
+
     /**
      * 注册资源过滤器。
-     * <p>仅当容器中存在 {@link ResourceInfoService} Bean 时生效。</p>
+     * <p>
+     * 仅当容器中存在 {@link ResourceInfoService} Bean 时生效。
+     * </p>
      *
      * @param resourceInfoService 资源信息服务
      * @return 资源过滤器实例
@@ -44,7 +65,9 @@ public class SecurityAutoConfiguration {
 
     /**
      * 注册默认的访问拒绝处理器。
-     * <p>仅当容器中不存在自定义 {@link CustomAccessDeniedHandler} 时生效。</p>
+     * <p>
+     * 仅当容器中不存在自定义 {@link CustomAccessDeniedHandler} 时生效。
+     * </p>
      *
      * @return 默认访问拒绝处理器
      */
@@ -56,7 +79,9 @@ public class SecurityAutoConfiguration {
 
     /**
      * 注册开发环境的 Token 解析过滤器。
-     * <p>当配置 {@code lingyun.auth.filter.token-parse=dev} 时生效。</p>
+     * <p>
+     * 当配置 {@code lingyun.auth.filter.token-parse=dev} 时生效。
+     * </p>
      *
      * @return 开发环境 Token 解析过滤器
      */
@@ -68,7 +93,9 @@ public class SecurityAutoConfiguration {
 
     /**
      * 注册生产环境的 Token 解析过滤器。
-     * <p>当配置 {@code lingyun.auth.filter.token-parse=prod} 时生效。</p>
+     * <p>
+     * 当配置 {@code lingyun.auth.filter.token-parse=prod} 时生效。
+     * </p>
      *
      * @return 生产环境 Token 解析过滤器
      */
@@ -80,7 +107,9 @@ public class SecurityAutoConfiguration {
 
     /**
      * 注册开发环境的鉴权管理器。
-     * <p>当配置 {@code lingyun.auth.custom.manager=dev} 时生效，始终放行所有请求。</p>
+     * <p>
+     * 当配置 {@code lingyun.auth.custom.manager=dev} 时生效，始终放行所有请求。
+     * </p>
      *
      * @return 开发环境鉴权管理器
      */
@@ -92,7 +121,9 @@ public class SecurityAutoConfiguration {
 
     /**
      * 注册生产环境的鉴权管理器。
-     * <p>当配置 {@code lingyun.auth.custom.manager=prod} 时生效，执行完整的权限校验逻辑。</p>
+     * <p>
+     * 当配置 {@code lingyun.auth.custom.manager=prod} 时生效，执行完整的权限校验逻辑。
+     * </p>
      *
      * @return 生产环境鉴权管理器
      */
@@ -104,8 +135,10 @@ public class SecurityAutoConfiguration {
 
     /**
      * 注册安全过滤器链组装助手。
-     * <p>仅当 TokenParseFilter、CustomAccessDeniedHandler、AccessDeniedHandler 和
-     * ResourceFilter 四个 Bean 全部就绪时生效，确保所有安全组件都已正确装配。</p>
+     * <p>
+     * 仅当 TokenParseFilter、CustomAccessDeniedHandler、AccessDeniedHandler 和
+     * ResourceFilter 四个 Bean 全部就绪时生效，确保所有安全组件都已正确装配。
+     * </p>
      *
      * @return 安全过滤器链组装助手
      */

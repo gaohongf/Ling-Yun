@@ -41,11 +41,11 @@ public class ResourceInfoAutoConfiguration {
         ResourceAuthorityMappingManager<AnnotationResourceInfo> manager = provider.getIfAvailable();
         if (manager == null) {
             throw new IllegalStateException(
-                "发现无自定义的 ResourceInfoService,程序试图默认创建一个根据注解自动配置的资源信息服务,但容器中缺少 ResourceAuthorityMappingManager 的实现。\n" +
+                "未发现自定义的 ResourceInfoService,程序试图默认创建一个根据注解自动配置的资源信息服务,但容器中缺少 ResourceAuthorityMappingManager 的实现。\n" +
                 "请确保：\n" +
-                "1. 已导入 spring-webmvc 依赖；\n" +
-                "2. 在配置类上添加了@EnableLingYunSecurity 以达到自动加载适配mvc的ResourceAuthorityMappingManager Bean的条件\n" +
-                "3. 或者手动提供自定义的 ResourceAuthorityMappingManager 或者 ResourceInfoService Bean。"
+                "1. 如果需要使用MVC spring-webmvc 依赖\n" +
+                "并且在配置类上添加 @EnableLingYunSecurity 以达到自动加载适配mvc的ResourceAuthorityMappingManager Bean的条件\n" +
+                "2. 手动提供自定义的 ResourceAuthorityMappingManager 或者 ResourceInfoService Bean。"
             );
         }
         return new AutoResourceInfoServiceImpl(manager);

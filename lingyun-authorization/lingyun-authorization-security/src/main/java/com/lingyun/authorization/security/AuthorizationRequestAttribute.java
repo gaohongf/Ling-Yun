@@ -1,6 +1,9 @@
 package com.lingyun.authorization.security;
 
+import org.springframework.security.core.Authentication;
+
 import com.lingyun.authorization.core.api.ResourceInfo;
+import com.lingyun.authorization.core.entity.CertifiedUser;
 import com.lingyun.base.request.CustomRequestAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +24,7 @@ public class AuthorizationRequestAttribute<T> extends CustomRequestAttributes<T>
             new AuthorizationRequestAttribute<>("AUTHORIZATION_RESOURCE_INFO");
 
     /** 已认证的用户（由 TokenParseFilter 设置） */
-    public static final AuthorizationRequestAttribute<CertifiedUser> AUTHORIZATION_CERTIFIED_USER =
+    public static final AuthorizationRequestAttribute<CertifiedUser<Authentication>> AUTHORIZATION_CERTIFIED_USER =
             new AuthorizationRequestAttribute<>("AUTHORIZATION_CERTIFIED_USER");
 
     /** 请求中的原始 Token 字符串（由 TokenParseFilter 设置） */

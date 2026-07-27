@@ -1,7 +1,7 @@
 package com.lingyun.authorization.core.session;
 
+import com.lingyun.authorization.core.entity.CertifiedUser;
 import com.lingyun.authorization.core.entity.User;
-import com.lingyun.base.user.IdentifiedUser;
 
 /**
  * 认证检查器 — 消费项目实现此接口，负责：
@@ -12,7 +12,7 @@ import com.lingyun.base.user.IdentifiedUser;
  * </ol>
  * <p>
  */
-public interface CertificationChecker<T extends IdentifiedUser> {
+public interface CertificationChecker<T extends CertifiedUser<?>> {
 
     /**
      * 对用户进行授权——检查用户状态、加载角色权限、构建 CertifiedUser。
