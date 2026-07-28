@@ -19,6 +19,8 @@
     <modules>
         <module>lingyun-authorization-core</module>
         <module>lingyun-authorization-security</module>
+        <module>lingyun-authorization-resource-allocation</module>
+        <module>lingyun-authorization-mvc-ra</module>
     </modules>
 
 </project>

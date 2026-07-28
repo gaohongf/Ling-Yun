@@ -9,6 +9,7 @@ import org.springframework.core.Ordered;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.lingyun.authorization.core.api.ResourceInfoService;
+import com.lingyun.authorization.core.request.BaseAuthorizationRequestAttribute;
 import com.lingyun.authorization.security.AuthorizationRequestAttribute;
 
 import java.io.IOException;

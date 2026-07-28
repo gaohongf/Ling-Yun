@@ -14,7 +14,7 @@ import org.springframework.web.context.request.RequestContextHolder;
  * @param <T> 存储的属性值类型
  */
 public abstract class CustomRequestAttributes<T> {
-    protected final String name;
+    public final String name;
 
     /**
      * 构造请求属性存取器，指定在 {@link RequestAttributes} 中的属性键名。
@@ -28,7 +28,6 @@ public abstract class CustomRequestAttributes<T> {
     /**
      * 直接尝试从上下文获取内容
      */
-    @SuppressWarnings("unchecked")
     public T get() {
         RequestAttributes requestAttributes = currentAttributes();
         if (requestAttributes == null)
@@ -41,10 +40,8 @@ public abstract class CustomRequestAttributes<T> {
      *
      * @return 包装了属性值的 Optional，可能为空
      */
-    @SuppressWarnings("unchecked")
     public Optional<T> getOpt() {
-        return Optional.of(RequestContextHolder.getRequestAttributes())
-                .map(attributes -> (T) attributes.getAttribute(name, RequestAttributes.SCOPE_REQUEST));
+        return Optional.ofNullable(get());
     }
 
     /**
