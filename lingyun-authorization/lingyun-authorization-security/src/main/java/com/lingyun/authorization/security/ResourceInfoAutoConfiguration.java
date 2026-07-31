@@ -5,6 +5,10 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
+import com.lingyun.authorization.core.api.SimpleResourceInfo;
+import com.lingyun.authorization.core.api.SimpleResourceInfoBuilder;
+import com.lingyun.authorization.core.api.ResourceAuthorityMappingManager;
+import com.lingyun.authorization.core.api.ResourceInfoBuilder;
 import com.lingyun.authorization.core.api.ResourceInfoService;
 
 /**
@@ -21,6 +25,12 @@ import com.lingyun.authorization.core.api.ResourceInfoService;
 @AutoConfiguration
 public class ResourceInfoAutoConfiguration {
 
+    @ConditionalOnMissingBean(ResourceInfoBuilder.class)
+    @Bean
+    public SimpleResourceInfoBuilder simpleInfoBuilder(){
+        return new SimpleResourceInfoBuilder();
+    }
+
     /**
      * 注册默认的资源信息服务。
      * <p>
@@ -36,9 +46,9 @@ public class ResourceInfoAutoConfiguration {
      */
     @ConditionalOnMissingBean(ResourceInfoService.class)
     @Bean
-    public ResourceInfoService<AnnotationResourceInfo> resourceInfoService(
-            ObjectProvider<ResourceAuthorityMappingManager<AnnotationResourceInfo>> provider) {
-        ResourceAuthorityMappingManager<AnnotationResourceInfo> manager = provider.getIfAvailable();
+    public ResourceInfoService<SimpleResourceInfo> resourceInfoService(
+            ObjectProvider<ResourceAuthorityMappingManager<SimpleResourceInfo>> provider) {
+        ResourceAuthorityMappingManager<SimpleResourceInfo> manager = provider.getIfAvailable();
         if (manager == null) {
             throw new IllegalStateException(
                 "未发现自定义的 ResourceInfoService,程序试图默认创建一个根据注解自动配置的资源信息服务,但容器中缺少 ResourceAuthorityMappingManager 的实现。\n" +

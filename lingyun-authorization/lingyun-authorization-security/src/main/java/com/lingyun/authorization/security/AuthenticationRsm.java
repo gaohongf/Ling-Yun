@@ -93,7 +93,7 @@ public class AuthenticationRsm implements RsmManager {
     public static final String ACCOUNT_EXISTS = "Authentication_ACCOUNT_EXISTS";
     // ---- 资源 ----
     /** 请求的 API 路径未被认证系统收录，可能是新增的 Controller 未重启服务导致 */
-    @RsmInfo(template = "未被认证系统正确收录的资源", status = HttpStatus.INTERNAL_SERVER_ERROR)
+    @RsmInfo(template = "未被认证系统正确收录的资源 {0}", status = HttpStatus.INTERNAL_SERVER_ERROR)
     public static final String UNAUTHENTICATED_RESOURCE = "Authentication_UNAUTHENTICATED_RESOURCE";
 
     /** 一个请求路径匹配到多个资源定义导致歧义（如同一路径匹配了两个模式评分相同的 HandlerMethod） */

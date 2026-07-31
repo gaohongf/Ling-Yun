@@ -33,7 +33,6 @@ import com.lingyun.authorization.security.filter.TokenParseFilter;
 })
 public class SecurityAutoConfiguration {
 
-
     /**
      * 注册 Spring Security 默认的认证检查器。
      * <p>
@@ -130,6 +129,7 @@ public class SecurityAutoConfiguration {
      * @return 开发环境鉴权管理器
      */
     @ConditionalOnProperty(prefix = "lingyun.auth.custom", name = "manager", havingValue = "dev")
+    @ConditionalOnMissingBean(CustomAuthorizationManager.class)
     @Bean
     public CustomAuthorizationManager devAuthorizationManager() {
         return new DevAuthorizationManager();
@@ -144,6 +144,7 @@ public class SecurityAutoConfiguration {
      * @return 生产环境鉴权管理器
      */
     @ConditionalOnProperty(prefix = "lingyun.auth.custom", name = "manager", havingValue = "prod")
+    @ConditionalOnMissingBean(CustomAuthorizationManager.class)
     @Bean
     public CustomAuthorizationManager prodAuthorizationManager() {
         return new ProdAuthorizationManager();

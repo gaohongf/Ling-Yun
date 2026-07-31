@@ -1,13 +1,19 @@
 package com.lingyun.authorization.security;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.AntPathMatcher;
 
+import com.lingyun.authorization.core.api.SimpleResourceInfo;
+import com.lingyun.authorization.core.api.ResourceAuthorityMappingManager;
 import com.lingyun.authorization.core.api.ResourceInfo;
 import com.lingyun.authorization.core.api.ResourceInfoService;
 import com.lingyun.authorization.core.api.annotation.IsOpen;
@@ -24,32 +30,34 @@ import com.lingyun.base.rsm.R;
  * <li>使用 {@link AntPathMatcher} 做模式匹配，兼容 {@code {id}} 路径变量和
  * {@code **} 通配符；</li>
  * <li>多模式命中时使用 {@link AntPathMatcher#getPatternComparator AntPathMatcher 内置比较器}
- *     排序（字面量 &gt; 通配符 &gt; 路径变量），最优两个评分相同时视为歧义并报错。</li>
+ * 排序（字面量 &gt; 通配符 &gt; 路径变量），最优两个评分相同时视为歧义并报错。</li>
  * </ul>
  * <p>
  * <b>性能特征</b>：O(1) 匹配（HashMap key lookup）优于 O(n) 遍历所有
  * <b>代价</b>：新增或修改 Controller 后需重启服务以重建映射表。
  */
 
-public class AutoResourceInfoServiceImpl implements ResourceInfoService<AnnotationResourceInfo>, InitializingBean {
+public class AutoResourceInfoServiceImpl implements ResourceInfoService<SimpleResourceInfo>, InitializingBean {
 
     private final AntPathMatcher matcher = new AntPathMatcher();
-    private final ResourceAuthorityMappingManager<AnnotationResourceInfo> resourceAuthorityMappingManager;
+    private final ResourceAuthorityMappingManager<SimpleResourceInfo> resourceAuthorityMappingManager;
     /**
      * 预构建的权限映射表。
      * <p>
      * Key 格式：{@code "GET:/api/users/{id}"}；Value：对应的
-     * {@link AnnotationResourceInfo}。
+     * {@link SimpleResourceInfo}。
      * 通过 {@link ConcurrentHashMap} 保证初始化后的线程安全读取。
      */
-    private Map<String, AnnotationResourceInfo> authorityMap = new ConcurrentHashMap<>();
+    private Map<String, SimpleResourceInfo> authorityMap = new ConcurrentHashMap<>();
 
     /**
      * 构造自动资源信息服务。
      *
-     * @param resourceAuthorityMappingManager 资源权限映射管理器，提供从 HandlerMethod 到 ResourceInfo 的转换
+     * @param resourceAuthorityMappingManager 资源权限映射管理器，提供从 HandlerMethod 到
+     *                                        ResourceInfo 的转换
      */
-    public AutoResourceInfoServiceImpl(ResourceAuthorityMappingManager<AnnotationResourceInfo> resourceAuthorityMappingManager) {
+    public AutoResourceInfoServiceImpl(
+            ResourceAuthorityMappingManager<SimpleResourceInfo> resourceAuthorityMappingManager) {
         this.resourceAuthorityMappingManager = resourceAuthorityMappingManager;
     }
 
@@ -58,7 +66,7 @@ public class AutoResourceInfoServiceImpl implements ResourceInfoService<Annotati
     public void afterPropertiesSet() {
         buildAuthorityMap();
     }
- 
+
     private void buildAuthorityMap() {
         authorityMap = resourceAuthorityMappingManager.buildAuthorityMap();
     }
@@ -75,13 +83,15 @@ public class AutoResourceInfoServiceImpl implements ResourceInfoService<Annotati
      * 未匹配到同样抛异常，由统一异常处理器接管。
      */
     @Override
-    public AnnotationResourceInfo matchPath(String method, String path) {
-        Comparator<String> patternComparator = matcher.getPatternComparator(path);
+    public SimpleResourceInfo matchPath(String method, String path) {
+        Comparator<String> patternComparator = matcher.getPatternComparator(method + ":" + path);
         List<String> matchedKeys = authorityMap.keySet().stream()
+                .map(key -> resourceAuthorityMappingManager.builder().originalResourceId(new SimpleResourceInfo(key)))
                 .filter(key -> matcher.match(key, method + ":" + path))
+                .distinct()
                 .sorted(patternComparator)
                 .toList();
-
+        
         if (matchedKeys.isEmpty()) {
             return R.error(AuthenticationRsm.UNAUTHENTICATED_RESOURCE);
         }
@@ -93,8 +103,17 @@ public class AutoResourceInfoServiceImpl implements ResourceInfoService<Annotati
                 return R.error(AuthenticationRsm.PATH_POINTS_TO_MULTIPLE_RESOURCES); // 歧义
             }
         }
-
-        return authorityMap.get(bestKey);
+        SimpleResourceInfo simpleResourceInfo = authorityMap.get(bestKey);
+        if (simpleResourceInfo != null) return simpleResourceInfo;
+        return new SimpleResourceInfo(bestKey);
     }
 
+    public static String originalResourceId(String id) {
+        if (!id.contains("#")) {
+            return id;
+        }
+        return id.substring(0, id.lastIndexOf("#"));
+    }
+
+  
 }
