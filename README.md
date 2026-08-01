@@ -20,6 +20,7 @@ Ling-Yun 帮你把 Controller 的返回值**自动包装**为统一的 JSON 响�
 - **内存兜底**：无数据库时自动启用内存存储，零配置即可运行
 - **可扩展**：消息存储支持热插拔——MyBatis-Plus / JDBC / 自定义实现可互换
 - **认证授权**：无状态 Token + 5 级鉴权 + Dev/Prod 双模式
+- **分支端点**：同一路径按权限分流到不同方法，告别 if-else 权限判断
 
 ## 模块一览
 
@@ -31,6 +32,8 @@ Ling-Yun 帮你把 Controller 的返回值**自动包装**为统一的 JSON 响�
 | `rsm-jdbc-spring-boot-starter` | Spring Data JDBC 消息存储 |
 | `lingyun-authorization-core` | 认证授权契约 |
 | `lingyun-authorization-security-spring-boot-starter` | Spring Security 集成 |
+| `lingyun-authorization-resource-allocation` | 请求分支控制核心 |
+| `lingyun-authorization-mvc-ra` | 分支控制 MVC 适配 |
 
 ## 快速入门
 
@@ -106,6 +109,7 @@ public class MyRsm extends RsmManager {
 | + Spring Data JDBC 消息存储 | `rsm-jdbc-spring-boot-starter` |
 | 只要认证授权接口 | `lingyun-authorization-core` |
 | + Spring Security 集成 | `lingyun-authorization-security-spring-boot-starter` |
+| + 请求分支控制（同一路径按权限分流） | 额外加 `lingyun-authorization-resource-allocation` + `lingyun-authorization-mvc-ra` |
 
 ## 配置参考
 
