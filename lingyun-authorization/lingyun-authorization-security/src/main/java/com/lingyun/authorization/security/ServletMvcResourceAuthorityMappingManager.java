@@ -25,9 +25,6 @@ import com.lingyun.authorization.core.api.annotation.IsOpen;
  * 仅当容器中存在 {@link RequestMappingHandlerMapping} Bean（即项目引入了 Spring Web
  * MVC）时才会注册。
  */
-@Component
-@ConditionalOnClass(RequestMappingHandlerMapping.class)
-@ConditionalOnBean(type = "org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping")
 public class ServletMvcResourceAuthorityMappingManager
         implements ResourceAuthorityMappingManager<SimpleResourceInfo> {
 
