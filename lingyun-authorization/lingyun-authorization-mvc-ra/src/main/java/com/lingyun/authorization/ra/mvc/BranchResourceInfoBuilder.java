@@ -11,8 +11,8 @@ import com.lingyun.authorization.ra.Branch;
  * <p>
  * 资源 ID 格式：
  * <ul>
- *   <li>无分支：{@code GET:/path}</li>
- *   <li>有分支：{@code GET:/path#branchName}</li>
+ * <li>无分支：{@code GET:/path}</li>
+ * <li>有分支：{@code GET:/path#branchName}</li>
  * </ul>
  * 这使得权限系统可以精确区分同一路径下的不同分支方法。
  *
@@ -31,19 +31,14 @@ public class BranchResourceInfoBuilder implements ResourceInfoBuilder<SimpleReso
      */
     @Override
     public SimpleResourceInfo build(String path, HandlerMethod handlerMethod,
-                                     String requestMethod, boolean open) {
+            String requestMethod, boolean open) {
         SimpleResourceInfo resourceInfo = new SimpleResourceInfo();
         Branch branch = handlerMethod.getMethodAnnotation(Branch.class);
-        if (branch == null) {
-            resourceInfo.setId(requestMethod + ":" + path);
-            resourceInfo.setName(handlerMethod.getMethod().getName());
-            resourceInfo.setOpen(open);
-            return resourceInfo;
-        }
-        // 有分支注解：ID 附加 "#branchName"
-        resourceInfo.setId(requestMethod + ":" + path + "#" + branch.value());
         resourceInfo.setName(handlerMethod.getMethod().getName());
         resourceInfo.setOpen(open);
+        resourceInfo.setId(branch == null
+                ? (requestMethod + ":" + path)
+                : (requestMethod + ":" + path + "#" + branch.value()));
         return resourceInfo;
     }
 
