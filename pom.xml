@@ -20,6 +20,7 @@
         <module>rsm-mybatisplus-spring-boot-starter</module>
         <module>rsm-jdbc-spring-boot-starter</module>
         <module>rsm-mvc-spring-boot-starter</module>
+        <module>lingyun-query</module>
     </modules>
 
     <properties>
