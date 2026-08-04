@@ -37,8 +37,6 @@ public class ResourceFilter extends OncePerRequestFilter implements Ordered {
     
     @Value("${server.error.path:${error.path:/error}}")
     private String errorPath = "/error";
-
-    private String favicon = "favicon.ico";
     /**
      * 构造资源过滤器。
      *
@@ -58,11 +56,6 @@ public class ResourceFilter extends OncePerRequestFilter implements Ordered {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String path = request.getRequestURI().substring(request.getContextPath().length());
-        if (favicon.equals(path)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
 
         resourceInfoService.optMatchPath(request.getMethod(), path)
                 .ifPresent(res -> AuthorizationRequestAttribute.AUTHORIZATION_RESOURCE_INFO.set(request, res));

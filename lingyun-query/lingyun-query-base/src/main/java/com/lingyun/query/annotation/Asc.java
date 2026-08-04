@@ -2,6 +2,8 @@ package com.lingyun.query.annotation;
 
 import java.lang.annotation.*;
 
+import com.lingyun.query.condition.OrderCondition;
+
 /**
  * 升序排序标记注解.
  * <p>
@@ -13,6 +15,11 @@ import java.lang.annotation.*;
  * @see Order
  * @see OrderCondition
  */
+@QueryAnnotation(
+    conditionType = OrderCondition.class,
+    rawAnnotation = Asc.class
+)
+@OmitValueClause
 @Inherited
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)

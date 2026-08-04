@@ -6,6 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.lingyun.query.condition.OrderCondition;
+
 /**
  * 允许前端动态控制排序规则.
  * <p>
@@ -18,6 +20,7 @@ import java.lang.annotation.Target;
  * @see Desc
  * @see OrderCondition
  */
+@QueryAnnotation(conditionType = OrderCondition.class, rawAnnotation = Order.class)
 @Inherited
 @Target({ ElementType.PARAMETER, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)

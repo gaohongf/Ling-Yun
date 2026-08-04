@@ -31,4 +31,9 @@ public class EqCondition<T> extends AbstractQueryCondition {
     public void setValue(T value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return getFieldName() + " = " + value;
+    }
 }

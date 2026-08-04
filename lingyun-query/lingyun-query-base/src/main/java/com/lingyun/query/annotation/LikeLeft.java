@@ -6,6 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.lingyun.query.condition.LikeCondition;
+
 /**
  * 左模糊匹配标记注解.
  * <p>
@@ -19,6 +21,7 @@ import java.lang.annotation.Target;
  * @see LikeCondition
  * @see LikeOption
  */
+@QueryAnnotation(conditionType = LikeCondition.class, rawAnnotation = LikeLeft.class)
 @Inherited
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)

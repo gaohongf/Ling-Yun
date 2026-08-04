@@ -56,4 +56,14 @@ public class LikeCondition<T> extends AbstractQueryCondition {
     public void setValue(T value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        String pattern = switch (option) {
+            case LIKE_LEFT  -> "%" + value;
+            case LIKE_RIGHT -> value + "%";
+            default         -> "%" + value + "%";
+        };
+        return getFieldName() + " LIKE '" + pattern + "'";
+    }
 }

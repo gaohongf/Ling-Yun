@@ -1,13 +1,9 @@
 package com.lingyun.authorization.security;
 
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.AntPathMatcher;
@@ -58,6 +54,7 @@ public class AutoResourceInfoServiceImpl implements ResourceInfoService<SimpleRe
      */
     public AutoResourceInfoServiceImpl(
             ResourceAuthorityMappingManager<SimpleResourceInfo> resourceAuthorityMappingManager) {
+            
         this.resourceAuthorityMappingManager = resourceAuthorityMappingManager;
     }
 

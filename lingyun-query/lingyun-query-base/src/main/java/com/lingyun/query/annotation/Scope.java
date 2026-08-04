@@ -2,6 +2,8 @@ package com.lingyun.query.annotation;
 
 import java.lang.annotation.*;
 
+import com.lingyun.query.condition.ScopeCondition;
+
 /**
  * 范围查询标记注解.
  * <p>
@@ -12,6 +14,7 @@ import java.lang.annotation.*;
  *
  * @see ScopeCondition
  */
+@QueryAnnotation(conditionType = ScopeCondition.class, rawAnnotation = Scope.class)
 @Inherited
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)

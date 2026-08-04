@@ -77,4 +77,14 @@ public class ConditionNode implements QueryCondition {
     public QueryLogic getLogic() {
         return logic;
     }
+
+    @Override
+    public String toString() {
+        if (conditions == null || conditions.isEmpty()) return "()";
+        String delimiter = " " + logic + " ";
+        return "(" + conditions.stream()
+                .map(QueryCondition::toString)
+                .reduce((a, b) -> a + delimiter + b)
+                .orElse("") + ")";
+    }
 }

@@ -30,4 +30,9 @@ public class OrderCondition extends AbstractQueryCondition {
     public OrderOption getOption() {
         return option;
     }
+
+    @Override
+    public String toString() {
+        return "ORDER BY " + getFieldName() + " " + option;
+    }
 }

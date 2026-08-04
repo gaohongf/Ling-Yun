@@ -129,4 +129,20 @@ public class ScopeCondition<T> extends AbstractQueryCondition {
     public int hashCode() {
         return Objects.hash(upperLimit, lowerLimit);
     }
+
+    @Override
+    public String toString() {
+        String field = getFieldName();
+        if (lowerLimit != null && upperLimit != null) {
+            return lowerLimit + (isGe() ? " <= " : " < ")
+                    + field + (isLe() ? " <= " : " < ") + upperLimit;
+        }
+        if (lowerLimit != null) {
+            return field + (isGe() ? " >= " : " > ") + lowerLimit;
+        }
+        if (upperLimit != null) {
+            return field + (isLe() ? " <= " : " < ") + upperLimit;
+        }
+        return field + " (no bounds)";
+    }
 }

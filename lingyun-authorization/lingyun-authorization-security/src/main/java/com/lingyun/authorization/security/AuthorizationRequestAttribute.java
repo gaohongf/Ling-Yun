@@ -1,6 +1,7 @@
 package com.lingyun.authorization.security;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 import com.lingyun.authorization.core.api.ResourceInfo;
 import com.lingyun.authorization.core.entity.CertifiedUser;
