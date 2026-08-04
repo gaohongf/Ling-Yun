@@ -15,8 +15,12 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lingyun.query.annotation.In;
+import com.lingyun.query.annotation.LikeLeft;
 import com.lingyun.query.annotation.OmitValueClause;
 import com.lingyun.query.annotation.QueryAnnotation;
+import com.lingyun.query.annotation.Scope;
+import com.lingyun.query.condition.Between;
 import com.lingyun.query.condition.QueryCondition;
 import com.lingyun.query.condition.QueryConditionUtils;
 
@@ -179,63 +183,61 @@ public class CriteriaQueryParser {
         }
     }
 
-    // /**
-    //  * 演示用入口（仅开发调试，生产环境请勿使用）.
-    //  * <p>
-    //  * 展示完整的解析流程：一条 JSON 同时包含字符串（模糊查询）、嵌套对象（范围查询）、
-    //  * 数组（IN 查询），且隐含了 {@code @Asc} 注解的无值字段（{@code createTime} 不会出现在
-    //  * 请求 JSON 中，但仍能被解析器识别喵）。
-    //  * </p>
-    //  *
-    //  * @param args 命令行参数（未使用）
-    //  */
-    // public static void main(String[] args) {
-    //     CriteriaQueryParser parser = new CriteriaQueryParser();
-    //     CriteriaQuery<Demo> x = parser.parse("{ \"name\": \"zhang\", \"age\": {\"le\": 10, \"gt\": 1}, \"ids\": [1,2,3]}", Demo.class);
-    //     System.out.println(x.getRaw());
-    //     System.out.println(x.getConditions());
-    // }
+    /**
+     * 演示用入口（仅开发调试，生产环境请勿使用）.
+     * <p>
+     * 展示完整的解析流程：一条 JSON 同时包含字符串（模糊查询）、嵌套对象（范围查询）、
+     * 数组（IN 查询），且隐含了 {@code @Asc} 注解的无值字段（{@code createTime} 不会出现在
+     * 请求 JSON 中，但仍能被解析器识别喵）。
+     * </p>
+     *
+     * @param args 命令行参数（未使用）
+     */
+    public static void main(String[] args) {
+        CriteriaQueryParser parser = new CriteriaQueryParser();
+        CriteriaQuery<Demo> x = parser.parse("{ \"name\": \"zhang\", \"age\": [1 ,10], \"ids\": [1,2,3]}", Demo.class);
+        System.out.println(x.getRaw());
+        System.out.println(x.getConditions());
+    }
 
-    // /**
-    //  * 演示用内部查询实体（私有 static 类，仅供 {@link #main} 使用）.
-    //  * <p>
-    //  * 包含三种典型查询字段：
-    //  * <ul>
-    //  *   <li>{@code name} — {@link LikeLeft} 左模糊查询</li>
-    //  *   <li>{@code age} — {@link Scope} 范围查询（BETWEEN 区间）</li>
-    //  *   <li>{@code ids} — {@link In} 集合包含查询</li>
-    //  * </ul>
-    //  */
-    // static class Demo implements Serializable {
-    //     @LikeLeft
-    //     private String name;
-    //     @Scope
-    //     private ScopeCondition<Integer> age;
-    //     @In
-    //     private int[] ids;
+    /**
+     * 演示用内部查询实体（私有 static 类，仅供 {@link #main} 使用）.
+     * <p>
+     * 包含三种典型查询字段：
+     * <ul>
+     *   <li>{@code name} — {@link LikeLeft} 左模糊查询</li>
+     *   <li>{@code age} — {@link Scope} 范围查询（BETWEEN 区间）</li>
+     *   <li>{@code ids} — {@link In} 集合包含查询</li>
+     * </ul>
+     */
+    static class Demo implements Serializable {
+        @LikeLeft
+        private String name;
+        @Scope
+        private Between<Integer> age;
+        @In
+        private int[] ids;
 
-    //     public String getName() {
-    //         return name;
-    //     }
+        public String getName() {
+            return name;
+        }
 
-    //     public void setName(String name) {
-    //         this.name = name;
-    //     }
+        public void setName(String name) {
+            this.name = name;
+        }
+        public Between<Integer> getAge() {
+            return age;
+        }
 
-    //     public ScopeCondition<Integer> getAge() {
-    //         return age;
-    //     }
+        public void setAge(Between<Integer> age) {
+            this.age = age;
+        }
+        public int[] getIds() {
+            return ids;
+        }
 
-    //     public void setAge(ScopeCondition<Integer> age) {
-    //         this.age = age;
-    //     }
-
-    //     public int[] getIds() {
-    //         return ids;
-    //     }
-
-    //     public void setIds(int[] ids) {
-    //         this.ids = ids;
-    //     }
-    // }
+        public void setIds(int[] ids) {
+            this.ids = ids;
+        }
+    }
 }
