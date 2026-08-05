@@ -68,4 +68,6 @@ public @interface QueryAnnotation {
      * @return 标注了本元注解的那个原始注解类
      */
     Class<? extends Annotation> rawAnnotation();
+
+    String name() default "";
 }

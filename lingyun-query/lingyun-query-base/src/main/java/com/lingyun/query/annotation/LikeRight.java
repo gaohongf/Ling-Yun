@@ -2,7 +2,11 @@ package com.lingyun.query.annotation;
 
 import java.lang.annotation.*;
 
+import org.springframework.core.annotation.AliasFor;
+
 import com.lingyun.query.condition.LikeCondition;
+import org.springframework.core.annotation.AliasFor;
+
 import com.lingyun.query.condition.LikeOption;
 
 /**
@@ -23,4 +27,7 @@ import com.lingyun.query.condition.LikeOption;
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LikeRight {
+    @AliasFor(annotation = QueryAnnotation.class, attribute = "name")
+    String value() default "";
+
 }

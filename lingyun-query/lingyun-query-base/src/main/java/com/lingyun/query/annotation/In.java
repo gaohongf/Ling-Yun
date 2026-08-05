@@ -2,6 +2,8 @@ package com.lingyun.query.annotation;
 
 import java.lang.annotation.*;
 
+import org.springframework.core.annotation.AliasFor;
+
 import com.lingyun.query.condition.InCondition;
 
 /**
@@ -14,13 +16,14 @@ import com.lingyun.query.condition.InCondition;
  * </p>
  *
  * <h3>使用示例</h3>
+ * 
  * <pre>{@code
  * public class UserQueryCriteria {
  *     @In
- *     private Long[] ids;          // 对应 WHERE id IN (1, 2, 3)
+ *     private Long[] ids; // 对应 WHERE id IN (1, 2, 3)
  *
  *     @In
- *     private List<String> names;  // 对应 WHERE name IN ('zhang', 'li')
+ *     private List<String> names; // 对应 WHERE name IN ('zhang', 'li')
  * }
  * }</pre>
  * <p>
@@ -35,5 +38,6 @@ import com.lingyun.query.condition.InCondition;
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface In {
-
+    @AliasFor(annotation = QueryAnnotation.class, attribute = "name")
+    String value() default "";
 }

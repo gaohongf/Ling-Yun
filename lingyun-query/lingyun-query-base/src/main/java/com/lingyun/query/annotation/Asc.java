@@ -2,6 +2,8 @@ package com.lingyun.query.annotation;
 
 import java.lang.annotation.*;
 
+import org.springframework.core.annotation.AliasFor;
+
 import com.lingyun.query.condition.OrderCondition;
 
 /**
@@ -24,4 +26,7 @@ import com.lingyun.query.condition.OrderCondition;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Asc {
+    @AliasFor(annotation = QueryAnnotation.class, attribute = "name")
+    String value() default "";
+
 }

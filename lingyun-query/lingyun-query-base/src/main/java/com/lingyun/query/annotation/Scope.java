@@ -2,6 +2,8 @@ package com.lingyun.query.annotation;
 
 import java.lang.annotation.*;
 
+import org.springframework.core.annotation.AliasFor;
+
 import com.lingyun.query.condition.ScopeCondition;
 
 /**
@@ -19,4 +21,6 @@ import com.lingyun.query.condition.ScopeCondition;
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Scope {
+    @AliasFor(annotation = QueryAnnotation.class, attribute = "name")
+    String value() default "";
 }

@@ -6,6 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 import com.lingyun.query.condition.OrderCondition;
 
 /**
@@ -25,4 +27,7 @@ import com.lingyun.query.condition.OrderCondition;
 @Target({ ElementType.PARAMETER, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Order {
+    @AliasFor(annotation = QueryAnnotation.class, attribute = "name")
+    String value() default "";
+
 }

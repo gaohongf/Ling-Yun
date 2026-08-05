@@ -15,8 +15,12 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lingyun.query.annotation.Eq;
 import com.lingyun.query.annotation.In;
+import com.lingyun.query.annotation.IsNotNull;
+import com.lingyun.query.annotation.IsNull;
 import com.lingyun.query.annotation.LikeLeft;
+import com.lingyun.query.annotation.NotIn;
 import com.lingyun.query.annotation.OmitValueClause;
 import com.lingyun.query.annotation.QueryAnnotation;
 import com.lingyun.query.annotation.Scope;
@@ -35,21 +39,22 @@ import com.lingyun.query.condition.QueryConditionUtils;
  *
  * <h3>解析流程（两阶段扫描）</h3>
  * <ol>
- *   <li><b>阶段一：无值字段扫描</b> — 遍历目标类型的所有声明字段，找出标注了
- *       {@link OmitValueClause} 的字段（如 {@code @Asc}、{@code @Desc}），
- *       以 {@code null} 为值生成对应的 {@link QueryCondition}。
- *       这些条件不需要请求方传入任何参数，语义自包含喵。</li>
- *   <li><b>阶段二：有值字段扫描</b> — 遍历 JSON 树中的每个字段，根据字段名
- *       在目标类型上反射查找 {@link java.lang.reflect.Field}，再检查其上的
- *       {@link QueryAnnotation} 注解来决定生成哪种条件：
- *       <ul>
- *         <li>无注解 → 默认生成 {@code EqCondition}（等值匹配）</li>
- *         <li>有注解 → 委托给 {@link QueryConditionUtils#getCondition} 按注解类型生成</li>
- *       </ul>
- *   </li>
+ * <li><b>阶段一：无值字段扫描</b> — 遍历目标类型的所有声明字段，找出标注了
+ * {@link OmitValueClause} 的字段（如 {@code @Asc}、{@code @Desc}），
+ * 以 {@code null} 为值生成对应的 {@link QueryCondition}。
+ * 这些条件不需要请求方传入任何参数，语义自包含喵。</li>
+ * <li><b>阶段二：有值字段扫描</b> — 遍历 JSON 树中的每个字段，根据字段名
+ * 在目标类型上反射查找 {@link java.lang.reflect.Field}，再检查其上的
+ * {@link QueryAnnotation} 注解来决定生成哪种条件：
+ * <ul>
+ * <li>无注解 → 默认生成 {@code EqCondition}（等值匹配）</li>
+ * <li>有注解 → 委托给 {@link QueryConditionUtils#getCondition} 按注解类型生成</li>
+ * </ul>
+ * </li>
  * </ol>
  *
  * <h3>使用示例</h3>
+ * 
  * <pre>{@code
  * // 定义查询实体
  * public static class UserQuery implements Serializable {
@@ -60,24 +65,23 @@ import com.lingyun.query.condition.QueryConditionUtils;
  *     @In
  *     private Long[] ids;
  *     @Asc
- *     @OmitValueClause  // Asc 本身已标注 @OmitValueClause，这里是展示用
+ *     @OmitValueClause // Asc 本身已标注 @OmitValueClause，这里是展示用
  *     private String createTime;
  * }
  *
  * // Controller 中使用
  * CriteriaQueryParser parser = new CriteriaQueryParser();
  * CriteriaQuery<UserQuery> query = parser.parse(
- *     "{\"name\":\"zhang\", \"age\":{\"le\":30, \"gt\":18}, \"ids\":[1,2,3]}",
- *     UserQuery.class
- * );
+ *         "{\"name\":\"zhang\", \"age\":{\"le\":30, \"gt\":18}, \"ids\":[1,2,3]}",
+ *         UserQuery.class);
  *
  * // 结果:
- * // query.getRaw()       → 完整反序列化的 UserQuery 对象
+ * // query.getRaw() → 完整反序列化的 UserQuery 对象
  * // query.getConditions() → [
- * //     LikeCondition(fieldName="name", value="zhang", option=LIKE_LEFT),
- * //     ScopeCondition(fieldName="age", lowerLimit=18, upperLimit=30, ...),
- * //     InCondition(fieldName="ids", elements=[1, 2, 3]),
- * //     OrderCondition(fieldName="createTime", option=ASC)  ← 无需传值也生成了!
+ * // LikeCondition(fieldName="name", value="zhang", option=LIKE_LEFT),
+ * // ScopeCondition(fieldName="age", lowerLimit=18, upperLimit=30, ...),
+ * // InCondition(fieldName="ids", elements=[1, 2, 3]),
+ * // OrderCondition(fieldName="createTime", option=ASC) ← 无需传值也生成了!
  * // ]
  * }</pre>
  *
@@ -94,7 +98,11 @@ import com.lingyun.query.condition.QueryConditionUtils;
  */
 public class CriteriaQueryParser {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public CriteriaQueryParser(ObjectMapper mapper) {
+        this.objectMapper = mapper;
+    }
 
     /**
      * 将 JSON 请求字符串解析为 {@link CriteriaQuery} 标准化查询对象.
@@ -114,8 +122,8 @@ public class CriteriaQueryParser {
      * 遍历 JSON 节点的每个 entry，用 Jackson 的 {@link ObjectMapper#convertValue} 将
      * JSON 值转换为字段声明的 Java 类型，然后：
      * <ul>
-     *   <li>若字段有 {@link QueryAnnotation} → 按注解类型生成对应条件</li>
-     *   <li>若字段无注解 → 默认生成 {@link com.lingyun.query.condition.EqCondition}（等值匹配）</li>
+     * <li>若字段有 {@link QueryAnnotation} → 按注解类型生成对应条件</li>
+     * <li>若字段无注解 → 默认生成 {@link com.lingyun.query.condition.EqCondition}（等值匹配）</li>
      * </ul>
      * 已在阶段一中处理过的字段会被跳过（避免重复生成）。
      *
@@ -136,8 +144,6 @@ public class CriteriaQueryParser {
         CriteriaQuery<T> query;
         try {
             JsonNode tree = objectMapper.readTree(jsonString);
-            raw = objectMapper.readValue(jsonString, type);
-            query = new OrdinaryCriteriaQuery<T>(raw);
             List<QueryCondition> conditions = new ArrayList<>(tree.size());
             Field[] declaredFields = type.getDeclaredFields();
             // 寻找无需传入参数的注解
@@ -177,10 +183,12 @@ public class CriteriaQueryParser {
                 } catch (NoSuchFieldException | SecurityException e) {
                 }
             });
+            raw = objectMapper.convertValue(tree, type);
+            query = new OrdinaryCriteriaQuery<T>(raw);
             query.setConditions(conditions);
             return query;
         } catch (JsonProcessingException e) {
-            throw new QueryRequestNormalizationFailedException("[查询条件反序列化失败]" ,e);
+            throw new QueryRequestNormalizationFailedException("[查询条件反序列化失败]", e);
         }
     }
 
@@ -195,8 +203,9 @@ public class CriteriaQueryParser {
      * @param args 命令行参数（未使用）
      */
     public static void main(String[] args) {
-        CriteriaQueryParser parser = new CriteriaQueryParser();
-        CriteriaQuery<Demo> x = parser.parse("{ \"name\": \"zhang\", \"age\": 18, \"ids\": [1,2,3]}", Demo.class);
+        CriteriaQueryParser parser = new CriteriaQueryParser(new ObjectMapper());
+        CriteriaQuery<Demo> x = parser.parse("{ \"name\": \"zhang\", \"betweenAge\": [18, 35], \"ids\": [1,2,3]}",
+                Demo.class);
         System.out.println(x.getRaw());
         System.out.println(x.getConditions());
     }
@@ -206,18 +215,20 @@ public class CriteriaQueryParser {
      * <p>
      * 包含三种典型查询字段：
      * <ul>
-     *   <li>{@code name} — {@link LikeLeft} 左模糊查询</li>
-     *   <li>{@code age} — {@link Scope} 范围查询（BETWEEN 区间）</li>
-     *   <li>{@code ids} — {@link In} 集合包含查询</li>
+     * <li>{@code name} — {@link LikeLeft} 左模糊查询</li>
+     * <li>{@code age} — {@link Scope} 范围查询（BETWEEN 区间）</li>
+     * <li>{@code ids} — {@link In} 集合包含查询</li>
      * </ul>
      */
     static class Demo implements Serializable {
-        @LikeLeft
+        @Eq("username")
         private String name;
-        @Scope
-        private Ge<Integer> age;
-        @In
+        @Scope("age")
+        private Between<Integer> betweenAge;
+        @NotIn
         private int[] ids;
+        @IsNotNull
+        private Void deleted;
 
         public String getName() {
             return name;
@@ -226,13 +237,15 @@ public class CriteriaQueryParser {
         public void setName(String name) {
             this.name = name;
         }
-        public Ge<Integer> getAge() {
-            return age;
+
+        public Between<Integer> getBetweenAge() {
+            return betweenAge;
         }
 
-        public void setAge(Ge<Integer> age) {
-            this.age = age;
+        public void setBetweenAge(Between<Integer> betweenAge) {
+            this.betweenAge = betweenAge;
         }
+
         public int[] getIds() {
             return ids;
         }

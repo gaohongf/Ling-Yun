@@ -6,6 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 import com.lingyun.query.condition.LikeCondition;
 
 /**
@@ -27,4 +29,7 @@ import com.lingyun.query.condition.LikeCondition;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LikeLeft {
     
+    @AliasFor(annotation = QueryAnnotation.class, attribute = "name")
+    String value() default "";
+
 }
