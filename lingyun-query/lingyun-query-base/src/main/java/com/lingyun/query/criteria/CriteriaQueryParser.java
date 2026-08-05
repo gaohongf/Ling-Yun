@@ -21,6 +21,7 @@ import com.lingyun.query.annotation.OmitValueClause;
 import com.lingyun.query.annotation.QueryAnnotation;
 import com.lingyun.query.annotation.Scope;
 import com.lingyun.query.condition.Between;
+import com.lingyun.query.condition.Ge;
 import com.lingyun.query.condition.QueryCondition;
 import com.lingyun.query.condition.QueryConditionUtils;
 
@@ -195,7 +196,7 @@ public class CriteriaQueryParser {
      */
     public static void main(String[] args) {
         CriteriaQueryParser parser = new CriteriaQueryParser();
-        CriteriaQuery<Demo> x = parser.parse("{ \"name\": \"zhang\", \"age\": [1 ,10], \"ids\": [1,2,3]}", Demo.class);
+        CriteriaQuery<Demo> x = parser.parse("{ \"name\": \"zhang\", \"age\": 18, \"ids\": [1,2,3]}", Demo.class);
         System.out.println(x.getRaw());
         System.out.println(x.getConditions());
     }
@@ -214,7 +215,7 @@ public class CriteriaQueryParser {
         @LikeLeft
         private String name;
         @Scope
-        private Between<Integer> age;
+        private Ge<Integer> age;
         @In
         private int[] ids;
 
@@ -225,11 +226,11 @@ public class CriteriaQueryParser {
         public void setName(String name) {
             this.name = name;
         }
-        public Between<Integer> getAge() {
+        public Ge<Integer> getAge() {
             return age;
         }
 
-        public void setAge(Between<Integer> age) {
+        public void setAge(Ge<Integer> age) {
             this.age = age;
         }
         public int[] getIds() {

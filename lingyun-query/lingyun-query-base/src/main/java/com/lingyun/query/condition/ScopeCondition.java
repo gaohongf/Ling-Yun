@@ -53,24 +53,6 @@ public class ScopeCondition<T> extends AbstractQueryCondition {
     }
 
     /**
-     * 获取下界值.
-     *
-     * @return 范围查询的下界，可能为 {@code null}
-     */
-    public T getLowerLimit() {
-        return lowerLimit;
-    }
-
-    /**
-     * 获取上界值.
-     *
-     * @return 范围查询的上界，可能为 {@code null}
-     */
-    public T getUpperLimit() {
-        return upperLimit;
-    }
-
-    /**
      * 判断是否存在上界且为闭区间（小于等于）.
      *
      * @return 如果上界不为 {@code null} 且包含等号则返回 {@code true}

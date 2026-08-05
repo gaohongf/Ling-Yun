@@ -35,12 +35,11 @@ public class Between<T> extends ScopeCondition<T> {
      */
     @JsonCreator
     public Between(List<T> value) {
-        if (value == null || value.size() != 2 || value.get(0) == null || value.get(1) == null) {
+        T t1;
+        T t2;
+        if (value == null || value.size() != 2 || (t1 = value.get(0)) == null || (t2 = value.get(1)) == null) {
             throw new QueryRequestNormalizationFailedException("between 需要包含两个非空的值");
         }
-
-        T t1 = value.get(0);
-        T t2 = value.get(1);
         if (t1 instanceof Comparable t1Comparable && t2 instanceof Comparable) {
             if (t1Comparable.compareTo(t2) == 1) {
                 setGe(t2);
